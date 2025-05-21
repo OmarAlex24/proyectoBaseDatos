@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml" prefWidth="400" prefHeight="500" style="-fx-background-color: linear-gradient(to bottom right, #43cea2, #185a9d)" fx:controller="expendiocrudproyecto.controlador.FXMLInicioSesionController">
+    <children>
+        <VBox alignment="CENTER" spacing="20" layoutX="50" layoutY="60" prefWidth="300" prefHeight="380"
+              style="-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, #185a9d, 20, 0.3, 0, 4);">
+            <children>
+                <Label text="Bienvenido" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #185a9d;" />
+                <Label text="Inicia sesión para continuar" style="-fx-font-size: 14px; -fx-text-fill: #888;" />
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <ImageView fitHeight="24" fitWidth="24">
+                        <image>
+                            <Image url="@../recursos/user_icon.png" />
+                        </image>
+                    </ImageView>
+                    <TextField fx:id="txtUsuario" promptText="Usuario" style="-fx-background-radius: 10;" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <ImageView fitHeight="24" fitWidth="24">
+                        <image>
+                            <Image url="@../recursos/lock_icon.png" />
+                        </image>
+                    </ImageView>
+                    <PasswordField fx:id="txtContrasenia" promptText="Contraseña" style="-fx-background-radius: 10;" />
+                </HBox>
+
+                <Button fx:id="btnLogin" text="Iniciar Sesión"
+                        style="-fx-background-color: linear-gradient(to right, #43cea2, #185a9d); -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 10; -fx-font-weight: bold; -fx-cursor: hand;"/>
+
+                <Label fx:id="lblError" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 13px;" visible="false"/>
+            </children>
+            <padding>
+                <Insets top="40" right="30" bottom="40" left="30"/>
+            </padding>
+        </VBox>
+    </children>
+</AnchorPane>

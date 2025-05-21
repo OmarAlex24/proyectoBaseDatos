@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="expendioCRUDProyecto">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dist/expendioCRUDProyecto.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

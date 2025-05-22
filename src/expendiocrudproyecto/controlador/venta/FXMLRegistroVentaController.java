@@ -16,12 +16,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -63,11 +60,11 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
     @FXML
     private TableColumn<DetalleVenta, String> tcProducto;
     @FXML
-    private TableColumn<DetalleVenta, Float> tcPrecioUnitario;
+    private TableColumn<DetalleVenta, Double> tcPrecioUnitario;
     @FXML
     private TableColumn<DetalleVenta, Integer> tcCantidad;
     @FXML
-    private TableColumn<DetalleVenta, Float> tcSubtotal;
+    private TableColumn<DetalleVenta, Double> tcSubtotal;
     @FXML
     private TableColumn<DetalleVenta, Void> tcAcciones;
     @FXML
@@ -88,9 +85,9 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
     private ObservableList<DetalleVenta> detallesVenta;
     private BebidaDAO bebidaDAO;
 
-    private float subtotal = 0.0f;
-    private float descuento = 0.0f;
-    private float total = 0.0f;
+    private double subtotal = 0.0;
+    private double descuento = 0.0;
+    private double total = 0.0;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -126,7 +123,7 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
     @Override
     public void inicializarUsuario(Usuario usuario) {
         this.usuarioSesion = usuario;
-        lblEmpleado.setText(usuario.getUsername() + " " + usuario.getIdEmpleado());
+        lblEmpleado.setText(usuario.getUsername());
     }
 
     private void configurarFechaActual() {
@@ -139,26 +136,44 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
     }
 
     private void configurarTabla() {
-        Double precioUnitario = 0.0;
-
         tcProducto.setCellValueFactory(cellData -> {
-            Bebida bebida = null;
-            try {
-                bebida = bebidaDAO.leerPorId(cellData.getValue().getIdProducto());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+            Bebida bebida = cellData.getValue().getBebida();
             return new SimpleStringProperty(bebida != null ? bebida.getNombre() : "");
         });
 
         tcPrecioUnitario.setCellValueFactory(cellData ->
-                new SimpleFloatProperty((float) cellData.getValue().getPrecioUnitario()).asObject());
+                new SimpleDoubleProperty(cellData.getValue().getPrecioUnitario()).asObject());
 
         tcCantidad.setCellValueFactory(cellData ->
                 new SimpleIntegerProperty(cellData.getValue().getCantidadUnitaria()).asObject());
 
         tcSubtotal.setCellValueFactory(cellData ->
-                new SimpleFloatProperty((float) cellData.getValue().getTotal_pagado()).asObject());
+                new SimpleDoubleProperty(cellData.getValue().getTotal_pagado()).asObject());
+
+        // Configurar formato para columnas de moneda
+        tcPrecioUnitario.setCellFactory(tc -> new TableCell<DetalleVenta, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("$%.2f", item));
+                }
+            }
+        });
+
+        tcSubtotal.setCellFactory(tc -> new TableCell<DetalleVenta, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("$%.2f", item));
+                }
+            }
+        });
 
         // Configurar columna de acciones (botón eliminar)
         tcAcciones.setCellFactory(param -> new TableCell<DetalleVenta, Void>() {
@@ -275,7 +290,8 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
         try {
             Connection conexion = ConexionBD.abrirConexion();
             if (conexion != null) {
-                String consulta = "SELECT idPromocion, nombre, descripcion, descuento, fechaInicio, fechaFin " +
+                String consulta = "SELECT idPromocion, nombre, descripcion, descuento, fechaInicio, fechaFin, " +
+                        "terminosCondiciones, acumulable, Producto_idProducto as idProducto " +
                         "FROM promocion " +
                         "WHERE fechaInicio <= CURRENT_DATE AND fechaFin >= CURRENT_DATE";
                 PreparedStatement statement = conexion.prepareStatement(consulta);
@@ -319,13 +335,33 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
 
     private void cargarProductos() {
         try {
-            List<Bebida> listaBebidas = bebidaDAO.leerTodo();
-            productos.clear();
-            productos.addAll(listaBebidas);
-            cbProducto.setItems(productos);
+            Connection conexion = ConexionBD.abrirConexion();
+            if (conexion != null) {
+                String consulta = "SELECT idProducto, nombre, precio, stock, stockMinimo FROM producto WHERE stock > 0";
+                PreparedStatement statement = conexion.prepareStatement(consulta);
+                ResultSet resultado = statement.executeQuery();
 
-            if (!productos.isEmpty()) {
-                cbProducto.getSelectionModel().select(0);
+                productos.clear();
+
+                while (resultado.next()) {
+                    Bebida bebida = new Bebida();
+                    bebida.setId(resultado.getInt("idProducto"));
+                    bebida.setNombre(resultado.getString("nombre"));
+                    bebida.setPrecio(resultado.getFloat("precio"));
+                    bebida.setStock(resultado.getInt("stock"));
+                    bebida.setStockMinimo(resultado.getInt("stockMinimo"));
+
+                    productos.add(bebida);
+                }
+
+                cbProducto.setItems(productos);
+                if (!productos.isEmpty()) {
+                    cbProducto.getSelectionModel().select(0);
+                }
+
+                resultado.close();
+                statement.close();
+                conexion.close();
             }
         } catch (SQLException ex) {
             mostrarAlerta("Error al cargar los productos: " + ex.getMessage(), Alert.AlertType.ERROR);
@@ -356,7 +392,7 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
 
         // Verificar si el producto ya está en la lista
         for (DetalleVenta detalle : detallesVenta) {
-            if (detalle.getIdProducto() == bebidaSeleccionada.getId()) {
+            if (detalle.getBebida() != null && detalle.getBebida().getId() == bebidaSeleccionada.getId()) {
                 // Actualizar cantidad si ya existe
                 int nuevaCantidad = detalle.getCantidadUnitaria() + cantidad;
 
@@ -377,6 +413,7 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
         // Agregar nuevo detalle si no existe
         DetalleVenta nuevoDetalle = new DetalleVenta();
         nuevoDetalle.setBebida(bebidaSeleccionada);
+        nuevoDetalle.setIdProducto(bebidaSeleccionada.getId());
         nuevoDetalle.setPrecioUnitario(bebidaSeleccionada.getPrecio());
         nuevoDetalle.setCantidadUnitaria(cantidad);
         nuevoDetalle.setTotal_pagado(bebidaSeleccionada.getPrecio() * cantidad);
@@ -391,7 +428,7 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
     }
 
     private void actualizarTotales() {
-        subtotal = 0.0f;
+        subtotal = 0.0;
 
         for (DetalleVenta detalle : detallesVenta) {
             subtotal += detalle.getTotal_pagado();
@@ -404,9 +441,9 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
         Promocion promocionSeleccionada = cbPromocion.getSelectionModel().getSelectedItem();
 
         if (promocionSeleccionada != null && promocionSeleccionada.getIdPromocion() > 0) {
-            descuento = subtotal * (promocionSeleccionada.getDescuento() / 100.0f);
+            descuento = subtotal * (promocionSeleccionada.getDescuento() / 100.0);
         } else {
-            descuento = 0.0f;
+            descuento = 0.0;
         }
 
         total = subtotal - descuento;
@@ -427,7 +464,6 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
             Connection conexion = ConexionBD.abrirConexion();
 
             if (conexion != null) {
-                conexion.setAutoCommit(false);
 
                 try {
                     // 1. Insertar la venta
@@ -436,18 +472,15 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
                     // 2. Insertar los detalles de la venta
                     insertarDetallesVenta(conexion, idVenta);
 
-                    // 3. Actualizar el stock de los productos
+                    // 3. Actualizar stock de producto
                     actualizarStockProductos(conexion);
 
-                    conexion.commit();
                     mostrarAlerta("Venta registrada correctamente", Alert.AlertType.INFORMATION);
                     cerrarVentana();
 
                 } catch (SQLException ex) {
-                    conexion.rollback();
                     mostrarAlerta("Error al registrar la venta: " + ex.getMessage(), Alert.AlertType.ERROR);
-                } finally {
-                    conexion.setAutoCommit(true);
+                } finally { 
                     conexion.close();
                 }
             }
@@ -457,39 +490,29 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
     }
 
     private int insertarVenta(Connection conexion) throws SQLException {
-        String consulta = "INSERT INTO venta (fecha, subtotal, descuento, total, idCliente, idEmpleado, idPromocion) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String consulta = "INSERT INTO venta (fechaVenta, Cliente_idCliente, folioFactura) VALUES (?, ?, ?)";
 
         PreparedStatement statement = conexion.prepareStatement(consulta, Statement.RETURN_GENERATED_KEYS);
 
         // Obtener cliente seleccionado
         Cliente clienteSeleccionado = cbCliente.getSelectionModel().getSelectedItem();
-        int idCliente = clienteSeleccionado != null && clienteSeleccionado.getIdCliente() > 0 ?
+        Integer idCliente = clienteSeleccionado != null && clienteSeleccionado.getIdCliente() > 0 ?
                 clienteSeleccionado.getIdCliente() : null;
 
-        // Obtener promoción seleccionada
-        Promocion promocionSeleccionada = cbPromocion.getSelectionModel().getSelectedItem();
-        int idPromocion = promocionSeleccionada != null && promocionSeleccionada.getIdPromocion() > 0 ?
-                promocionSeleccionada.getIdPromocion() : null;
+        // Generar folio de factura (formato simple: VENTA-YYYYMMDD-XXXX)
+        LocalDate fecha = dpFechaVenta.getValue();
+        String folio = "VENTA-" + fecha.toString().replace("-", "") + "-" +
+                String.format("%04d", (int)(Math.random() * 10000));
 
-        statement.setDate(1, java.sql.Date.valueOf(dpFechaVenta.getValue()));
-        statement.setFloat(2, subtotal);
-        statement.setFloat(3, descuento);
-        statement.setFloat(4, total);
+        statement.setDate(1, java.sql.Date.valueOf(fecha));
 
-        if (idCliente != 0) {
-            statement.setInt(5, idCliente);
+        if (idCliente != null) {
+            statement.setInt(2, idCliente);
         } else {
-            statement.setNull(5, java.sql.Types.INTEGER);
+            statement.setNull(2, java.sql.Types.INTEGER);
         }
 
-        statement.setInt(6, usuarioSesion.getIdUsuario());
-
-        if (idPromocion != 0) {
-            statement.setInt(7, idPromocion);
-        } else {
-            statement.setNull(7, java.sql.Types.INTEGER);
-        }
+        statement.setString(3, folio);
 
         statement.executeUpdate();
 
@@ -507,17 +530,16 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
     }
 
     private void insertarDetallesVenta(Connection conexion, int idVenta) throws SQLException {
-        String consulta = "INSERT INTO detalleVenta (idVenta, idBebida, cantidad, precioUnitario, subtotal) " +
-                "VALUES (?, ?, ?, ?, ?)";
+        String consulta = "INSERT INTO detalle_venta (Producto_idProducto, Venta_idVenta, total_pagado, cantidadUnitaria) " +
+                "VALUES (?, ?, ?, ?)";
 
         PreparedStatement statement = conexion.prepareStatement(consulta);
 
         for (DetalleVenta detalle : detallesVenta) {
-            statement.setInt(1, idVenta);
-            statement.setInt(2, detalle.getBebida().getId());
-            statement.setInt(3, detalle.getCantidadUnitaria());
-            statement.setDouble(4, detalle.getPrecioUnitario());
-            statement.setDouble(5, detalle.getTotal_pagado());
+            statement.setInt(1, detalle.getBebida().getId());
+            statement.setInt(2, idVenta);
+            statement.setDouble(3, detalle.getTotal_pagado());
+            statement.setInt(4, detalle.getCantidadUnitaria());
 
             statement.executeUpdate();
         }
@@ -526,7 +548,7 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
     }
 
     private void actualizarStockProductos(Connection conexion) throws SQLException {
-        String consulta = "UPDATE bebida SET stock = stock - ? WHERE idBebida = ?";
+        String consulta = "UPDATE producto SET stock = stock - ? WHERE idProducto = ?";
 
         PreparedStatement statement = conexion.prepareStatement(consulta);
 

@@ -85,7 +85,7 @@
                                 <Font name="System Bold" size="14.0" />
                             </font>
                         </Label>
-                        <Label fx:id="lblMontoTotal" text="$0.00">
+                        <Label fx:id="lblMontoTotal" text="0.00">
                             <font>
                                 <Font size="14.0" />
                             </font>

@@ -40,7 +40,7 @@
                                         <Label text="Cliente:" GridPane.rowIndex="1" />
                                         <Label text="Empleado:" GridPane.rowIndex="2" />
                                         <Label text="Promoción:" GridPane.rowIndex="3" />
-                                        <DatePicker fx:id="dpFechaVenta" disable="true" prefHeight="25.0" prefWidth="280.0" GridPane.columnIndex="1" />
+                                        <DatePicker fx:id="dpFechaVenta" prefHeight="25.0" prefWidth="280.0" GridPane.columnIndex="1" />
                                         <ComboBox fx:id="cbCliente" prefHeight="25.0" prefWidth="280.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                         <Label fx:id="lblEmpleado" text="[Nombre del empleado]" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                         <ComboBox fx:id="cbPromocion" prefHeight="25.0" prefWidth="280.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
@@ -107,7 +107,7 @@
                                 <Font name="System Bold" size="14.0" />
                             </font>
                         </Label>
-                        <Label fx:id="lblSubtotal" text="$0.00">
+                        <Label fx:id="lblSubtotal" text="0.00">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -117,7 +117,7 @@
                                 <Font name="System Bold" size="14.0" />
                             </font>
                         </Label>
-                        <Label fx:id="lblDescuento" text="$0.00">
+                        <Label fx:id="lblDescuento" text="0.00">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -127,7 +127,7 @@
                                 <Font name="System Bold" size="16.0" />
                             </font>
                         </Label>
-                        <Label fx:id="lblTotal" text="$0.00">
+                        <Label fx:id="lblTotal" text="0.00">
                             <font>
                                 <Font name="System Bold" size="16.0" />
                             </font>

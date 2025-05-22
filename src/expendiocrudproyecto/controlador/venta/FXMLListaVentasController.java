@@ -11,10 +11,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.ResourceBundle;
-import javafx.beans.property.SimpleFloatProperty;
+
+import expendiocrudproyecto.utilidades.Alertas;
+import expendiocrudproyecto.utilidades.UtilPantallas;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -27,7 +29,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
@@ -61,11 +62,11 @@ public class FXMLListaVentasController implements Initializable, FXMLPrincipalCo
     @FXML
     private TableColumn<Venta, String> tcEmpleado;
     @FXML
-    private TableColumn<Venta, Float> tcSubtotal;
+    private TableColumn<Venta, Double> tcSubtotal;
     @FXML
-    private TableColumn<Venta, Float> tcDescuento;
+    private TableColumn<Venta, Double> tcDescuento;
     @FXML
-    private TableColumn<Venta, Float> tcTotal;
+    private TableColumn<Venta, Double> tcTotal;
     @FXML
     private TableColumn<Venta, Void> tcAcciones;
     @FXML
@@ -107,23 +108,23 @@ public class FXMLListaVentasController implements Initializable, FXMLPrincipalCo
         });
 
         tcCliente.setCellValueFactory(cellData -> {
-            String nombreCliente =  String.valueOf(cellData.getValue().getIdCliente());
+            String nombreCliente = String.valueOf(cellData.getValue().getIdCliente());
             return new SimpleStringProperty(nombreCliente != null ? nombreCliente : "Sin cliente");
         });
 
         tcSubtotal.setCellValueFactory(cellData ->
-                new SimpleFloatProperty(cellData.getValue().getSubtotal().floatValue()).asObject());
+                new SimpleDoubleProperty(cellData.getValue().getSubtotal()).asObject());
 
         tcDescuento.setCellValueFactory(cellData ->
-                new SimpleFloatProperty(cellData.getValue().getSubtotal().floatValue()).asObject());
+                new SimpleDoubleProperty(cellData.getValue().getDescuento()).asObject());
 
         tcTotal.setCellValueFactory(cellData ->
-                new SimpleFloatProperty(cellData.getValue().getTotalVenta().floatValue()).asObject());
+                new SimpleDoubleProperty(cellData.getValue().getTotalVenta()).asObject());
 
         // Configurar formato para columnas de moneda
-        tcSubtotal.setCellFactory(tc -> new TableCell<Venta, Float>() {
+        tcSubtotal.setCellFactory(tc -> new TableCell<Venta, Double>() {
             @Override
-            protected void updateItem(Float item, boolean empty) {
+            protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
@@ -133,9 +134,9 @@ public class FXMLListaVentasController implements Initializable, FXMLPrincipalCo
             }
         });
 
-        tcDescuento.setCellFactory(tc -> new TableCell<Venta, Float>() {
+        tcDescuento.setCellFactory(tc -> new TableCell<Venta, Double>() {
             @Override
-            protected void updateItem(Float item, boolean empty) {
+            protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
@@ -145,9 +146,9 @@ public class FXMLListaVentasController implements Initializable, FXMLPrincipalCo
             }
         });
 
-        tcTotal.setCellFactory(tc -> new TableCell<Venta, Float>() {
+        tcTotal.setCellFactory(tc -> new TableCell<Venta, Double>() {
             @Override
-            protected void updateItem(Float item, boolean empty) {
+            protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
@@ -169,7 +170,7 @@ public class FXMLListaVentasController implements Initializable, FXMLPrincipalCo
 
                 btnDetalles.setOnAction(event -> {
                     Venta venta = getTableView().getItems().get(getIndex());
-//                    mostrarDetallesVenta(venta);
+                    mostrarDetallesVenta(venta);
                 });
 
                 btnImprimir.setOnAction(event -> {
@@ -207,29 +208,28 @@ public class FXMLListaVentasController implements Initializable, FXMLPrincipalCo
                 LocalDate fechaFin = dpFechaFin.getValue();
 
                 StringBuilder consulta = new StringBuilder();
-                consulta.append("SELECT v.idVenta, v.fecha, v.subtotal, v.descuento, v.total, ");
+                consulta.append("SELECT v.idVenta, v.fechaVenta, v.Cliente_idCliente, v.folioFactura, ");
                 consulta.append("c.nombre AS nombreCliente, ");
-                consulta.append("CONCAT(e.nombre, ' ', e.apellidoPaterno) AS nombreEmpleado, ");
-                consulta.append("p.nombre AS nombrePromocion ");
+                consulta.append("SUM(dv.total_pagado) AS total ");
                 consulta.append("FROM venta v ");
-                consulta.append("LEFT JOIN cliente c ON v.idCliente = c.idCliente ");
-                consulta.append("LEFT JOIN usuario e ON v.idEmpleado = e.idUsuario ");
-                consulta.append("LEFT JOIN promocion p ON v.idPromocion = p.idPromocion ");
+                consulta.append("LEFT JOIN cliente c ON v.Cliente_idCliente = c.idCliente ");
+                consulta.append("LEFT JOIN detalle_venta dv ON v.idVenta = dv.Venta_idVenta ");
                 consulta.append("WHERE 1=1 ");
 
                 if (fechaInicio != null) {
-                    consulta.append("AND v.fecha >= ? ");
+                    consulta.append("AND DATE(v.fechaVenta) >= ? ");
                 }
 
                 if (fechaFin != null) {
-                    consulta.append("AND v.fecha <= ? ");
+                    consulta.append("AND DATE(v.fechaVenta) <= ? ");
                 }
 
                 if (!busqueda.isEmpty()) {
-                    consulta.append("AND (v.idVenta LIKE ? OR c.nombre LIKE ?) ");
+                    consulta.append("AND (v.idVenta LIKE ? OR c.nombre LIKE ? OR v.folioFactura LIKE ?) ");
                 }
 
-                consulta.append("ORDER BY v.fecha DESC, v.idVenta DESC");
+                consulta.append("GROUP BY v.idVenta, v.fechaVenta, v.Cliente_idCliente, v.folioFactura, c.nombre ");
+                consulta.append("ORDER BY v.fechaVenta DESC, v.idVenta DESC");
 
                 PreparedStatement statement = conexion.prepareStatement(consulta.toString());
 
@@ -246,20 +246,26 @@ public class FXMLListaVentasController implements Initializable, FXMLPrincipalCo
                 if (!busqueda.isEmpty()) {
                     statement.setString(paramIndex++, "%" + busqueda + "%");
                     statement.setString(paramIndex++, "%" + busqueda + "%");
+                    statement.setString(paramIndex++, "%" + busqueda + "%");
                 }
 
                 ResultSet resultado = statement.executeQuery();
 
                 ventas.clear();
-                float montoTotal = 0.0f;
+                double montoTotal = 0.0;
 
                 while (resultado.next()) {
                     Venta venta = new Venta();
                     venta.setIdVenta(resultado.getInt("idVenta"));
-                    venta.setFechaVenta(resultado.getDate("fecha"));
-                    venta.setSubtotal(resultado.getDouble("subtotal"));
-                    venta.setDescuento(resultado.getDouble("descuento"));
-                    venta.setTotalVenta(resultado.getDouble("total"));
+                    venta.setFechaVenta(resultado.getTimestamp("fechaVenta"));
+                    venta.setIdCliente(resultado.getInt("Cliente_idCliente"));
+                    venta.setFolioFactura(resultado.getString("folioFactura"));
+
+                    // Calcular subtotal, descuento y total
+                    double total = resultado.getDouble("total");
+                    venta.setTotalVenta(total);
+                    venta.setSubtotal(total); // Por ahora, asumimos que no hay descuento
+                    venta.setDescuento(0.0);
 
                     ventas.add(venta);
                     montoTotal += venta.getTotalVenta();
@@ -273,7 +279,8 @@ public class FXMLListaVentasController implements Initializable, FXMLPrincipalCo
                 conexion.close();
             }
         } catch (SQLException ex) {
-            mostrarAlerta("Error al cargar las ventas: " + ex.getMessage(), Alert.AlertType.ERROR);
+            Alertas.crearAlerta(Alert.AlertType.ERROR, "Error",
+                    "Error al cargar las ventas: " + ex.getMessage());
         }
     }
 
@@ -299,30 +306,32 @@ public class FXMLListaVentasController implements Initializable, FXMLPrincipalCo
             cargarVentas();
 
         } catch (IOException ex) {
-            mostrarAlerta("Error al abrir la ventana de registro de venta: " + ex.getMessage(),
-                    Alert.AlertType.ERROR);
+            Alertas.crearAlerta(Alert.AlertType.ERROR, "Error",
+                    "Error al abrir la ventana de registro de venta: " + ex.getMessage());
         }
     }
 
-//    private void mostrarDetallesVenta(Venta venta) {
-//        try {
-//            FXMLLoader loader = new FXMLLoader(getClass().getResource("/expendiocrudproyecto/vista/venta/FXMLDetalleVenta.fxml"));
-//            Parent vista = loader.load();
-//
-////            FXMLDetalleVentaController controller = loader.getController();
-////            controller.inicializarVenta(venta.getIdVenta());
-//
-//            Stage stage = new Stage();
-//            stage.setScene(new Scene(vista));
-//            stage.setTitle("Detalle de Venta #" + venta.getIdVenta());
-//            stage.initModality(Modality.APPLICATION_MODAL);
-//            stage.showAndWait();
-//
-//        } catch (IOException ex) {
-//            mostrarAlerta("Error al abrir la ventana de detalle de venta: " + ex.getMessage(),
-//                    Alert.AlertType.ERROR);
-//        }
-//    }
+    private void mostrarDetallesVenta(Venta venta) {
+        try {
+            // Mostrar detalles de la venta en una alerta por ahora
+            StringBuilder detalles = new StringBuilder();
+            detalles.append("Detalles de la Venta #").append(venta.getIdVenta()).append("\n\n");
+            detalles.append("Fecha: ").append(venta.getFechaVenta()).append("\n");
+            detalles.append("Folio: ").append(venta.getFolioFactura()).append("\n");
+            detalles.append("Cliente ID: ").append(venta.getIdCliente()).append("\n");
+            detalles.append("Total: $").append(String.format("%.2f", venta.getTotalVenta()));
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Detalles de Venta");
+            alert.setHeaderText("Venta #" + venta.getIdVenta());
+            alert.setContentText(detalles.toString());
+            alert.showAndWait();
+
+        } catch (Exception ex) {
+            Alertas.crearAlerta(Alert.AlertType.ERROR, "Error",
+                    "Error al mostrar detalles de la venta: " + ex.getMessage());
+        }
+    }
 
     private void imprimirVenta(Venta venta) {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
@@ -333,15 +342,6 @@ public class FXMLListaVentasController implements Initializable, FXMLPrincipalCo
     }
 
     private void regresar(ActionEvent event) {
-        Stage escenario = (Stage) btnRegresar.getScene().getWindow();
-        escenario.close();
-    }
-
-    private void mostrarAlerta(String mensaje, Alert.AlertType tipo) {
-        Alert alerta = new Alert(tipo);
-        alerta.setTitle("Sistema de Gestión de Bebidas");
-        alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
+        UtilPantallas.regresarPrincipal(event, usuarioSesion, btnRegresar);
     }
 }

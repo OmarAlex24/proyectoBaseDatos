@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="expendiocrudproyecto.controlador.FXMLPrincipalController">
+    <left>
+        <VBox fx:id="menuLateral" alignment="TOP_CENTER" prefHeight="600.0" prefWidth="220.0" style="-fx-background-color: #185a9d;" BorderPane.alignment="CENTER">
+            <children>
+                <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+<!--                        <Image url="@../recursos/logo.png" />-->
+                    </image>
+                    <VBox.margin>
+                        <Insets bottom="10.0" top="20.0" />
+                    </VBox.margin>
+                </ImageView>
+                <Label fx:id="lblBienvenida" alignment="CENTER" prefHeight="20.0" prefWidth="200.0" text="Bienvenido(a)" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblTipoUsuario" alignment="CENTER" prefHeight="20.0" prefWidth="200.0" text="Rol: Administrador" textFill="WHITE">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin>
+                </Label>
+                <Separator prefWidth="200.0">
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </Separator>
+                <Button fx:id="btnVentas" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Ventas">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+<!--                                <Image url="@../recursos/ventas_icon.png" />-->
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+                <Button fx:id="btnPromociones" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Promociones">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+<!--                                <Image url="@../recursos/promociones_icon.png" />-->
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+                <Button fx:id="btnClientes" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Clientes">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+<!--                                <Image url="@../recursos/clientes_icon.png" />-->
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+                <Button fx:id="btnPedidosCliente" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Pedidos de Clientes">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+<!--                                <Image url="@../recursos/pedidos_cliente_icon.png" />-->
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+                <Button fx:id="btnPedidosMercancia" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Pedidos de Mercancía">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+<!--                                <Image url="@../recursos/pedidos_mercancia_icon.png" />-->
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+                <Button fx:id="btnProveedores" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Proveedores">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+<!--                                <Image url="@../recursos/proveedores_icon.png" />-->
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+                <Button fx:id="btnProductos" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Productos">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+<!--                                <Image url="@../recursos/productos_icon.png" />-->
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+                <Separator prefWidth="200.0">
+                    <VBox.margin>
+                        <Insets top="10.0" />
+                    </VBox.margin>
+                </Separator>
+                <Button fx:id="btnCerrarSesion" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Cerrar Sesión">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+<!--                                <Image url="@../recursos/logout_icon.png" />-->
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                    <VBox.margin>
+                        <Insets top="10.0" />
+                    </VBox.margin>
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <StackPane prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: #f5f5f5;" BorderPane.alignment="CENTER">
+            <children>
+                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+                    <children>
+                        <ImageView fitHeight="200.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+<!--                            <image>-->
+<!--                                <Image url="@../recursos/logo_grande.png" />-->
+<!--                            </image>-->
+                        </ImageView>
+                        <Label text="Sistema de Gestión de Bebidas" textFill="#185a9d">
+                            <font>
+                                <Font name="System Bold" size="24.0" />
+                            </font>
+                            <VBox.margin>
+                                <Insets top="20.0" />
+                            </VBox.margin>
+                        </Label>
+                        <Label text="Seleccione una opción del menú lateral para comenzar" textFill="#666666">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                            <VBox.margin>
+                                <Insets top="10.0" />
+                            </VBox.margin>
+                        </Label>
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+    </center>
+</BorderPane>

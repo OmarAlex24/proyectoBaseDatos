@@ -32,8 +32,8 @@ public class UsuarioDAO {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 Usuario usuario = new Usuario();
-                usuario.setIdUsuario(rs.getInt("id"));
-                usuario.setUsername(rs.getString("nombre"));
+                usuario.setIdUsuario(rs.getInt("idUsuario"));
+                usuario.setUsername(rs.getString("username"));
                 usuario.setContrasenia(rs.getString("contrasenia"));
                 usuario.setTipoUsuario(TipoUsuario.fromId(rs.getInt("idTipoUsuario")));
                 usuario.setIdEmpleado(rs.getInt("idEmpleado"));

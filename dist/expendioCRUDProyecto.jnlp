@@ -8,7 +8,8 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="expendioCRUDProyecto.jar" size="20684" download="eager" />
+    <jar href="expendioCRUDProyecto.jar" size="80958" download="eager" />
+    <jar href="lib\mysql-connector-java-8.0.20.jar" size="2385601" download="eager" />
   </resources>
   <jfx:javafx-desc  width="800" height="600" main-class="expendiocrudproyecto.App"  name="expendioCRUDProyecto" />
   <update check="always"/>

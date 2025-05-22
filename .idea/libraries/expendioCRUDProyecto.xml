@@ -2,6 +2,7 @@
   <library name="expendioCRUDProyecto">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/dist/expendioCRUDProyecto.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/mysql-connector-java-8.0.20.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

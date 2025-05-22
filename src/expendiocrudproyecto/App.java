@@ -1,5 +1,6 @@
 package expendiocrudproyecto;
 
+import expendiocrudproyecto.modelo.dao.UsuarioDAO;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -32,6 +33,7 @@ public class App extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+
         launch(args);
     }
 

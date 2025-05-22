@@ -1,18 +1,12 @@
 package expendiocrudproyecto.controlador.proveedor;
 
 import expendiocrudproyecto.controlador.FXMLPrincipalController;
-import expendiocrudproyecto.controlador.proveedor.FXMLFormularioProveedorController;
-import expendiocrudproyecto.modelo.ConexionBD;
 import expendiocrudproyecto.modelo.dao.ProveedorDAO;
 import expendiocrudproyecto.modelo.pojo.Proveedor;
 import expendiocrudproyecto.modelo.pojo.Usuario;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -101,41 +95,13 @@ public class FXMLListaProveedoresController implements Initializable, FXMLPrinci
 
     private void cargarProveedores() {
         try {
-            List<Proveedor> listaProveedores = obtenerTodosLosProveedores();
+            List<Proveedor> listaProveedores = proveedorDAO.leerTodo();
             proveedores.clear();
             proveedores.addAll(listaProveedores);
             tvProveedores.setItems(proveedores);
         } catch (SQLException ex) {
             mostrarAlerta("Error al cargar los proveedores: " + ex.getMessage(), Alert.AlertType.ERROR);
         }
-    }
-
-    private List<Proveedor> obtenerTodosLosProveedores() throws SQLException {
-        List<Proveedor> listaProveedores = new ArrayList<>();
-        Connection conexion = ConexionBD.abrirConexion();
-
-        if (conexion != null) {
-            String consulta = "SELECT idProveedor, razonSocial, telefono, direccion, correo FROM proveedor";
-            PreparedStatement statement = conexion.prepareStatement(consulta);
-            ResultSet resultado = statement.executeQuery();
-
-            while (resultado.next()) {
-                Proveedor proveedor = new Proveedor();
-                proveedor.setIdProveedor(resultado.getInt("idProveedor"));
-                proveedor.setRazonSocial(resultado.getString("razonSocial"));
-                proveedor.setTelefono(resultado.getString("telefono"));
-                proveedor.setDireccion(resultado.getString("direccion"));
-                proveedor.setCorreo(resultado.getString("correo"));
-
-                listaProveedores.add(proveedor);
-            }
-
-            resultado.close();
-            statement.close();
-            conexion.close();
-        }
-
-        return listaProveedores;
     }
 
     private void buscarProveedores(ActionEvent event) {
@@ -145,7 +111,7 @@ public class FXMLListaProveedoresController implements Initializable, FXMLPrinci
             cargarProveedores();
         } else {
             try {
-                List<Proveedor> resultadosBusqueda = buscarProveedoresPorCriterio(criterioBusqueda);
+                List<Proveedor> resultadosBusqueda = proveedorDAO.buscarPorNombre(criterioBusqueda);
                 proveedores.clear();
                 proveedores.addAll(resultadosBusqueda);
                 tvProveedores.setItems(proveedores);
@@ -153,38 +119,6 @@ public class FXMLListaProveedoresController implements Initializable, FXMLPrinci
                 mostrarAlerta("Error al buscar proveedores: " + ex.getMessage(), Alert.AlertType.ERROR);
             }
         }
-    }
-
-    private List<Proveedor> buscarProveedoresPorCriterio(String criterio) throws SQLException {
-        List<Proveedor> listaProveedores = new ArrayList<>();
-        Connection conexion = ConexionBD.abrirConexion();
-
-        if (conexion != null) {
-            String consulta = "SELECT idProveedor, razonSocial, telefono, direccion, correo FROM proveedor " +
-                    "WHERE razonSocial LIKE ? OR telefono LIKE ?";
-            PreparedStatement statement = conexion.prepareStatement(consulta);
-            statement.setString(1, "%" + criterio + "%");
-            statement.setString(2, "%" + criterio + "%");
-
-            ResultSet resultado = statement.executeQuery();
-
-            while (resultado.next()) {
-                Proveedor proveedor = new Proveedor();
-                proveedor.setIdProveedor(resultado.getInt("idProveedor"));
-                proveedor.setRazonSocial(resultado.getString("razonSocial"));
-                proveedor.setTelefono(resultado.getString("telefono"));
-                proveedor.setDireccion(resultado.getString("direccion"));
-                proveedor.setCorreo(resultado.getString("correo"));
-
-                listaProveedores.add(proveedor);
-            }
-
-            resultado.close();
-            statement.close();
-            conexion.close();
-        }
-
-        return listaProveedores;
     }
 
     private void agregarProveedor(ActionEvent event) {
@@ -244,7 +178,7 @@ public class FXMLListaProveedoresController implements Initializable, FXMLPrinci
 
             if (respuesta.isPresent() && respuesta.get() == ButtonType.OK) {
                 try {
-                    boolean eliminacionExitosa = eliminarProveedorBD(proveedorSeleccionado.getIdProveedor());
+                    boolean eliminacionExitosa = proveedorDAO.eliminar(proveedorSeleccionado.getIdProveedor());
 
                     if (eliminacionExitosa) {
                         mostrarAlerta("Proveedor eliminado correctamente", Alert.AlertType.INFORMATION);
@@ -259,25 +193,6 @@ public class FXMLListaProveedoresController implements Initializable, FXMLPrinci
         } else {
             mostrarAlerta("Debe seleccionar un proveedor para eliminar", Alert.AlertType.WARNING);
         }
-    }
-
-    private boolean eliminarProveedorBD(int idProveedor) throws SQLException {
-        Connection conexion = ConexionBD.abrirConexion();
-        boolean eliminacionExitosa = false;
-
-        if (conexion != null) {
-            String consulta = "DELETE FROM proveedor WHERE idProveedor = ?";
-            PreparedStatement statement = conexion.prepareStatement(consulta);
-            statement.setInt(1, idProveedor);
-
-            int filasAfectadas = statement.executeUpdate();
-            eliminacionExitosa = filasAfectadas > 0;
-
-            statement.close();
-            conexion.close();
-        }
-
-        return eliminacionExitosa;
     }
 
     private void regresar(ActionEvent event) {

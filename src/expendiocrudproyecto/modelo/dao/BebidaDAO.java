@@ -7,6 +7,8 @@ package expendiocrudproyecto.modelo.dao;
 
 import expendiocrudproyecto.modelo.ConexionBD;
 import expendiocrudproyecto.modelo.pojo.Bebida;
+import expendiocrudproyecto.modelo.pojo.Promocion;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +68,30 @@ public class BebidaDAO implements CrudDAO<Bebida> {
         }
 
         return bebida;
+    }
+
+    public List<Bebida> buscarPorNombre(String nombre) throws SQLException {
+        List<Bebida> listaPromociones = new ArrayList<>();
+        Connection conexion = ConexionBD.abrirConexion();
+
+        if (conexion != null) {
+            String consulta = "SELECT idProducto, nombre, precio, stock, stockMinimo FROM producto " +
+                    "WHERE nombre LIKE ?";
+            PreparedStatement statement = conexion.prepareStatement(consulta);
+            statement.setString(1, "%" + nombre + "%");
+
+            ResultSet resultado = statement.executeQuery();
+
+            while (resultado.next()) {
+                listaPromociones.add(convertirBebida(resultado));
+            }
+
+            resultado.close();
+            statement.close();
+            conexion.close();
+        }
+
+        return listaPromociones;
     }
 
     @Override

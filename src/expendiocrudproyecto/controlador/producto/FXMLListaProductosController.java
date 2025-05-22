@@ -109,22 +109,23 @@ public class FXMLListaProductosController implements Initializable, FXMLPrincipa
         }
     }
 
-//    private void buscarProductos(ActionEvent event) {
-//        String criterioBusqueda = tfBusqueda.getText().trim();
-//
-//        if (criterioBusqueda.isEmpty()) {
-//            cargarProductos();
-//        } else {
-//            try {
-//                List<Bebida> resultadosBusqueda = bebidaDAO.buscarPorNombre(criterioBusqueda);
-//                productos.clear();
-//                productos.addAll(resultadosBusqueda);
-//                tvProductos.setItems(productos);
-//            } catch (SQLException ex) {
-//                mostrarAlerta("Error al buscar productos: " + ex.getMessage(), Alert.AlertType.ERROR);
-//            }
-//        }
-//    }
+    private void buscarProductos(ActionEvent event) {
+        String criterioBusqueda = tfBusqueda.getText().trim();
+
+        if (criterioBusqueda.isEmpty()) {
+            cargarProductos();
+        } else {
+            try {
+                List<Bebida> resultadosBusqueda = bebidaDAO.buscarPorNombre(criterioBusqueda);
+                productos.clear();
+                productos.addAll(resultadosBusqueda);
+                tvProductos.setItems(productos);
+            } catch (SQLException ex) {
+                Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al buscar productos",
+                        "Error al buscar productos: " + ex.getMessage());
+            }
+        }
+    }
 
     private void agregarProducto(ActionEvent event) {
         try {

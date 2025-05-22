@@ -1,15 +1,11 @@
 package expendiocrudproyecto.controlador.cliente;
 
 import expendiocrudproyecto.controlador.FXMLPrincipalController;
-import expendiocrudproyecto.modelo.ConexionBD;
+import expendiocrudproyecto.modelo.dao.ClienteDAO;
 import expendiocrudproyecto.modelo.pojo.Cliente;
 import expendiocrudproyecto.modelo.pojo.Usuario;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ResourceBundle;
 
 import expendiocrudproyecto.utilidades.Alertas;
@@ -42,9 +38,11 @@ public class FXMLFormularioClienteController implements Initializable, FXMLPrinc
     private Usuario usuarioSesion;
     private Cliente clienteEdicion;
     private boolean esEdicion;
+    private ClienteDAO clienteDAO;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        clienteDAO = new ClienteDAO();
         btnGuardar.setOnAction(this::guardarCliente);
         btnCancelar.setOnAction(this::cancelar);
     }
@@ -81,69 +79,31 @@ public class FXMLFormularioClienteController implements Initializable, FXMLPrinc
                 clienteEdicion.setCorreo(tfCorreo.getText().trim());
                 clienteEdicion.setRazonSocial(tfRazonSocial.getText().trim());
 
-                Connection conexion = ConexionBD.abrirConexion();
+                if (esEdicion) {
+                    // Actualizar cliente existente
+                    boolean operacionExitosa = clienteDAO.actualizar(clienteEdicion);
 
-                if (conexion != null) {
-                    boolean operacionExitosa;
-
-                    if (esEdicion) {
-                        // Actualizar cliente existente
-                        String consulta = "UPDATE cliente SET nombre = ?, telefono = ?, correo = ?, razonSocial = ? WHERE idCliente = ?";
-
-                        PreparedStatement statement = conexion.prepareStatement(consulta);
-                        statement.setString(1, clienteEdicion.getNombre());
-                        statement.setString(2, clienteEdicion.getTelefono());
-                        statement.setString(3, clienteEdicion.getCorreo());
-                        statement.setString(4, clienteEdicion.getRazonSocial());
-                        statement.setInt(5, clienteEdicion.getIdCliente());
-
-                        int filasActualizadas = statement.executeUpdate();
-                        operacionExitosa = filasActualizadas > 0;
-
-                        statement.close();
-
-                        if (operacionExitosa) {
-                            Alertas.crearAlerta(Alert.AlertType.INFORMATION, "Cliente actualizado",
-                                    "El cliente ha sido actualizado correctamente.");
-                            cerrarVentana();
-                        } else {
-                            Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al actualizar cliente",
-                                    "No se pudo actualizar el cliente, por favor intentalo mas tarde");
-                        }
+                    if (operacionExitosa) {
+                        Alertas.crearAlerta(Alert.AlertType.INFORMATION, "Cliente actualizado",
+                                "El cliente ha sido actualizado correctamente.");
+                        cerrarVentana();
                     } else {
-                        // Insertar nuevo cliente
-                        String consulta = "INSERT INTO cliente (nombre, telefono, correo, razonSocial) VALUES (?, ?, ?, ?)";
-
-                        PreparedStatement statement = conexion.prepareStatement(consulta, Statement.RETURN_GENERATED_KEYS);
-                        statement.setString(1, clienteEdicion.getNombre());
-                        statement.setString(2, clienteEdicion.getTelefono());
-                        statement.setString(3, clienteEdicion.getCorreo());
-                        statement.setString(4, clienteEdicion.getRazonSocial());
-
-                        int filasInsertadas = statement.executeUpdate();
-
-                        if (filasInsertadas > 0) {
-                            ResultSet generatedKeys = statement.getGeneratedKeys();
-                            if (generatedKeys.next()) {
-                                clienteEdicion.setIdCliente(generatedKeys.getInt(1));
-                                Alertas.crearAlerta(Alert.AlertType.INFORMATION, "Cliente guardado",
-                                        "El cliente ha sido guardado correctamente.");
-                                cerrarVentana();
-                            }
-                        } else {
-                            Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al guardar cliente",
-                                    "No se pudo guardar el cliente, por favor intentalo mas tarde");
-                        }
-
-                        statement.close();
+                        Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al actualizar cliente",
+                                "No se pudo actualizar el cliente, por favor intentalo mas tarde");
                     }
-
-                    conexion.close();
                 } else {
-                    Alertas.crearAlerta(Alert.AlertType.ERROR, "Error de conexión",
-                            "No se pudo conectar a la base de datos. Por favor, verifica tu conexión.");
-                }
+                    // Insertar nuevo cliente
+                    Cliente clienteInsertado = clienteDAO.insertar(clienteEdicion);
 
+                    if (clienteInsertado != null && clienteInsertado.getIdCliente() != null) {
+                        Alertas.crearAlerta(Alert.AlertType.INFORMATION, "Cliente guardado",
+                                "El cliente ha sido guardado correctamente.");
+                        cerrarVentana();
+                    } else {
+                        Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al guardar cliente",
+                                "No se pudo guardar el cliente, por favor intentalo mas tarde");
+                    }
+                }
             } catch (SQLException ex) {
                 Alertas.crearAlerta(Alert.AlertType.ERROR, "Error de base de datos",
                         "Error al guardar el cliente, por favor intentalo mas tarde" );
@@ -176,5 +136,4 @@ public class FXMLFormularioClienteController implements Initializable, FXMLPrinc
         Stage escenario = (Stage) btnCancelar.getScene().getWindow();
         escenario.close();
     }
-
 }

@@ -1,5 +1,6 @@
 package expendiocrudproyecto.modelo.pojo;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Venta {
@@ -10,16 +11,21 @@ public class Venta {
     private Double totalVenta;
     private Double subtotal;
     private Double descuento;
+    private ArrayList<DetalleVenta> detalleVenta;
 
 
     public Venta() {
     }
 
-    public Venta(int idVenta, int idCliente, String folioFactura, Date fechaVenta) {
+    public Venta(int idVenta, int idCliente, String folioFactura, Date fechaVenta, Double totalVenta, Double subtotal, Double descuento, ArrayList<DetalleVenta> detalleVenta) {
         this.idVenta = idVenta;
         this.idCliente = idCliente;
         this.folioFactura = folioFactura;
         this.fechaVenta = fechaVenta;
+        this.totalVenta = totalVenta;
+        this.subtotal = subtotal;
+        this.descuento = descuento;
+        this.detalleVenta = detalleVenta;
     }
 
     public Double getTotalVenta() {
@@ -76,5 +82,13 @@ public class Venta {
 
     public void setFechaVenta(Date fechaVenta) {
         this.fechaVenta = fechaVenta;
+    }
+
+    public ArrayList<DetalleVenta> getDetalleVenta() {
+        return detalleVenta;
+    }
+
+    public void setDetalleVenta(ArrayList<DetalleVenta> detalleVenta) {
+        this.detalleVenta = detalleVenta;
     }
 }

@@ -1,8 +1,9 @@
 package expendiocrudproyecto.controlador.venta;
 
 import expendiocrudproyecto.controlador.FXMLPrincipalController;
-import expendiocrudproyecto.modelo.ConexionBD;
 import expendiocrudproyecto.modelo.dao.BebidaDAO;
+import expendiocrudproyecto.modelo.dao.PromocionDAO;
+import expendiocrudproyecto.modelo.dao.VentaDAO;
 import expendiocrudproyecto.modelo.pojo.Bebida;
 import expendiocrudproyecto.modelo.pojo.Cliente;
 import expendiocrudproyecto.modelo.pojo.DetalleVenta;
@@ -10,14 +11,13 @@ import expendiocrudproyecto.modelo.pojo.Promocion;
 import expendiocrudproyecto.modelo.pojo.Usuario;
 import expendiocrudproyecto.modelo.pojo.Venta;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import expendiocrudproyecto.utilidades.Alertas;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -84,6 +84,8 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
     private ObservableList<Bebida> productos;
     private ObservableList<DetalleVenta> detallesVenta;
     private BebidaDAO bebidaDAO;
+    private PromocionDAO promocionDAO;
+    private VentaDAO ventaDAO;
 
     private double subtotal = 0.0;
     private double descuento = 0.0;
@@ -97,6 +99,9 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
         configurarBotones();
 
         bebidaDAO = new BebidaDAO();
+        promocionDAO = new PromocionDAO();
+        ventaDAO = new VentaDAO();
+
         clientes = FXCollections.observableArrayList();
         promociones = FXCollections.observableArrayList();
         productos = FXCollections.observableArrayList();
@@ -202,7 +207,7 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
     private void configurarBotones() {
         btnAgregarProducto.setOnAction(this::agregarProducto);
         btnRegistrarVenta.setOnAction(this::registrarVenta);
-        btnCancelar.setOnAction(this::cancelar);
+//        btnCancelar.setOnAction(this::cancelar);
     }
 
     private void configurarConversorClientes() {
@@ -249,122 +254,56 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
 
     private void cargarClientes() {
         try {
-            Connection conexion = ConexionBD.abrirConexion();
-            if (conexion != null) {
-                String consulta = "SELECT idCliente, nombre, telefono, correo, razonSocial FROM cliente";
-                PreparedStatement statement = conexion.prepareStatement(consulta);
-                ResultSet resultado = statement.executeQuery();
-
-                clientes.clear();
-
-                // Agregar opción "Sin cliente"
-                Cliente sinCliente = new Cliente();
-                sinCliente.setIdCliente(0);
-                sinCliente.setNombre("Sin cliente");
-                clientes.add(sinCliente);
-
-                while (resultado.next()) {
-                    Cliente cliente = new Cliente();
-                    cliente.setIdCliente(resultado.getInt("idCliente"));
-                    cliente.setNombre(resultado.getString("nombre"));
-                    cliente.setTelefono(resultado.getString("telefono"));
-                    cliente.setCorreo(resultado.getString("correo"));
-                    cliente.setRazonSocial(resultado.getString("razonSocial"));
-
-                    clientes.add(cliente);
-                }
-
-                cbCliente.setItems(clientes);
-                cbCliente.getSelectionModel().select(0); // Seleccionar "Sin cliente" por defecto
-
-                resultado.close();
-                statement.close();
-                conexion.close();
-            }
+            List<Cliente> listaClientes = ventaDAO.obtenerClientes();
+            clientes.clear();
+            clientes.addAll(listaClientes);
+            cbCliente.setItems(clientes);
+            cbCliente.getSelectionModel().select(0); // Seleccionar "Sin cliente" por defecto
         } catch (SQLException ex) {
-            mostrarAlerta("Error al cargar los clientes: " + ex.getMessage(), Alert.AlertType.ERROR);
+            Alertas.crearAlerta(Alert.AlertType.ERROR, "Error", "Error al cargar los clientes: " + ex.getMessage());
         }
     }
 
     private void cargarPromociones() {
         try {
-            Connection conexion = ConexionBD.abrirConexion();
-            if (conexion != null) {
-                String consulta = "SELECT idPromocion, nombre, descripcion, descuento, fechaInicio, fechaFin, " +
-                        "terminosCondiciones, acumulable, Producto_idProducto as idProducto " +
-                        "FROM promocion " +
-                        "WHERE fechaInicio <= CURRENT_DATE AND fechaFin >= CURRENT_DATE";
-                PreparedStatement statement = conexion.prepareStatement(consulta);
-                ResultSet resultado = statement.executeQuery();
+            List<Promocion> listaPromociones = promocionDAO.leerPromocionesVigentes();
+            promociones.clear();
 
-                promociones.clear();
+            // Agregar opción "Sin promoción"
+            Promocion sinPromocion = new Promocion();
+            sinPromocion.setIdPromocion(0);
+            sinPromocion.setNombre("Sin promoción");
+            sinPromocion.setDescuento(0);
+            promociones.add(sinPromocion);
 
-                // Agregar opción "Sin promoción"
-                Promocion sinPromocion = new Promocion();
-                sinPromocion.setIdPromocion(0);
-                sinPromocion.setNombre("Sin promoción");
-                sinPromocion.setDescuento(0);
-                promociones.add(sinPromocion);
-
-                while (resultado.next()) {
-                    Promocion promocion = new Promocion();
-                    promocion.setIdPromocion(resultado.getInt("idPromocion"));
-                    promocion.setNombre(resultado.getString("nombre"));
-                    promocion.setDescripcion(resultado.getString("descripcion"));
-                    promocion.setDescuento(resultado.getInt("descuento"));
-                    promocion.setFechaInicio(resultado.getDate("fechaInicio"));
-                    promocion.setFechaFin(resultado.getDate("fechaFin"));
-                    promocion.setAcumulable(resultado.getBoolean("acumulable"));
-                    promocion.setTerminosCondiciones(resultado.getString("terminosCondiciones"));
-                    promocion.setIdProducto(resultado.getInt("idProducto"));
-
-                    promociones.add(promocion);
-                }
-
-                cbPromocion.setItems(promociones);
-                cbPromocion.getSelectionModel().select(0); // Seleccionar "Sin promoción" por defecto
-
-                resultado.close();
-                statement.close();
-                conexion.close();
-            }
+            promociones.addAll(listaPromociones);
+            cbPromocion.setItems(promociones);
+            cbPromocion.getSelectionModel().select(0); // Seleccionar "Sin promoción" por defecto
         } catch (SQLException ex) {
-            mostrarAlerta("Error al cargar las promociones: " + ex.getMessage(), Alert.AlertType.ERROR);
+            Alertas.crearAlerta(
+                    Alert.AlertType.ERROR, "Error", "Error al cargar las promociones: " + ex.getMessage()
+            );
         }
     }
 
     private void cargarProductos() {
         try {
-            Connection conexion = ConexionBD.abrirConexion();
-            if (conexion != null) {
-                String consulta = "SELECT idProducto, nombre, precio, stock, stockMinimo FROM producto WHERE stock > 0";
-                PreparedStatement statement = conexion.prepareStatement(consulta);
-                ResultSet resultado = statement.executeQuery();
+            List<Bebida> listaProductos = bebidaDAO.leerTodo();
+            productos.clear();
 
-                productos.clear();
-
-                while (resultado.next()) {
-                    Bebida bebida = new Bebida();
-                    bebida.setId(resultado.getInt("idProducto"));
-                    bebida.setNombre(resultado.getString("nombre"));
-                    bebida.setPrecio(resultado.getFloat("precio"));
-                    bebida.setStock(resultado.getInt("stock"));
-                    bebida.setStockMinimo(resultado.getInt("stockMinimo"));
-
+            // Filtrar productos con stock > 0
+            for (Bebida bebida : listaProductos) {
+                if (bebida.getStock() > 0) {
                     productos.add(bebida);
                 }
+            }
 
-                cbProducto.setItems(productos);
-                if (!productos.isEmpty()) {
-                    cbProducto.getSelectionModel().select(0);
-                }
-
-                resultado.close();
-                statement.close();
-                conexion.close();
+            cbProducto.setItems(productos);
+            if (!productos.isEmpty()) {
+                cbProducto.getSelectionModel().select(0);
             }
         } catch (SQLException ex) {
-            mostrarAlerta("Error al cargar los productos: " + ex.getMessage(), Alert.AlertType.ERROR);
+            Alertas.crearAlerta(Alert.AlertType.ERROR, "Error", "Error al cargar los productos: " + ex.getMessage());
         }
     }
 
@@ -372,21 +311,25 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
         Bebida bebidaSeleccionada = cbProducto.getSelectionModel().getSelectedItem();
 
         if (bebidaSeleccionada == null) {
-            mostrarAlerta("Debe seleccionar un producto", Alert.AlertType.WARNING);
+            Alertas.crearAlerta(
+                    Alert.AlertType.WARNING, "Advertencia", "Seleccione un producto."
+            );
             return;
         }
 
         int cantidad = spCantidad.getValue();
 
         if (cantidad <= 0) {
-            mostrarAlerta("La cantidad debe ser mayor que cero", Alert.AlertType.WARNING);
+            Alertas.crearAlerta(
+                    Alert.AlertType.WARNING, "Advertencia", "La cantidad debe ser mayor a 0."
+            );
             return;
         }
 
         // Verificar si hay suficiente stock
         if (bebidaSeleccionada.getStock() < cantidad) {
-            mostrarAlerta("No hay suficiente stock. Stock disponible: " + bebidaSeleccionada.getStock(),
-                    Alert.AlertType.WARNING);
+            Alertas.crearAlerta(
+                    Alert.AlertType.WARNING, "Advertencia", "No hay suficiente stock. Stock disponible: " + bebidaSeleccionada.getStock());
             return;
         }
 
@@ -397,8 +340,7 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
                 int nuevaCantidad = detalle.getCantidadUnitaria() + cantidad;
 
                 if (bebidaSeleccionada.getStock() < nuevaCantidad) {
-                    mostrarAlerta("No hay suficiente stock para agregar esa cantidad. Stock disponible: " +
-                            bebidaSeleccionada.getStock(), Alert.AlertType.WARNING);
+                    Alertas.crearAlerta(Alert.AlertType.WARNING, "Advertencia", "No hay suficiente stock. Stock disponible: " + bebidaSeleccionada.getStock());
                     return;
                 }
 
@@ -456,126 +398,38 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
 
     private void registrarVenta(ActionEvent event) {
         if (detallesVenta.isEmpty()) {
-            mostrarAlerta("Debe agregar al menos un producto a la venta", Alert.AlertType.WARNING);
+            Alertas.crearAlerta(Alert.AlertType.WARNING, "Advertencia", "No hay productos en el detalle de venta.");
             return;
         }
 
         try {
-            Connection conexion = ConexionBD.abrirConexion();
+            // Crear objeto Venta
+            Venta nuevaVenta = new Venta();
+            nuevaVenta.setFechaVenta(java.sql.Date.valueOf(dpFechaVenta.getValue()));
 
-            if (conexion != null) {
-
-                try {
-                    // 1. Insertar la venta
-                    int idVenta = insertarVenta(conexion);
-
-                    // 2. Insertar los detalles de la venta
-                    insertarDetallesVenta(conexion, idVenta);
-
-                    // 3. Actualizar stock de producto
-                    actualizarStockProductos(conexion);
-
-                    mostrarAlerta("Venta registrada correctamente", Alert.AlertType.INFORMATION);
-                    cerrarVentana();
-
-                } catch (SQLException ex) {
-                    mostrarAlerta("Error al registrar la venta: " + ex.getMessage(), Alert.AlertType.ERROR);
-                } finally { 
-                    conexion.close();
-                }
+            // Obtener cliente seleccionado
+            Cliente clienteSeleccionado = cbCliente.getSelectionModel().getSelectedItem();
+            if (clienteSeleccionado != null && clienteSeleccionado.getIdCliente() > 0) {
+                nuevaVenta.setIdCliente(clienteSeleccionado.getIdCliente());
             }
+
+            // Generar folio de factura
+            nuevaVenta.setFolioFactura(ventaDAO.generarFolioFactura(dpFechaVenta.getValue()));
+
+            // Agregar detalles de venta
+            nuevaVenta.setDetalleVenta(new ArrayList<>(detallesVenta));
+
+            // Registrar venta en la base de datos
+            Venta ventaRegistrada = ventaDAO.insertar(nuevaVenta);
+
+            if (ventaRegistrada != null && ventaRegistrada.getIdVenta() > 0) {
+                Alertas.crearAlerta(Alert.AlertType.INFORMATION, "Éxito", "Venta registrada con éxito. Folio: " + ventaRegistrada.getFolioFactura());
+            } else {
+                Alertas.crearAlerta(Alert.AlertType.ERROR, "Error", "No se pudo registrar la venta.");
+            }
+
         } catch (SQLException ex) {
-            mostrarAlerta("Error en la conexión a la base de datos: " + ex.getMessage(), Alert.AlertType.ERROR);
+            Alertas.crearAlerta(Alert.AlertType.ERROR, "Error", "Error al registrar la venta: " + ex.getMessage());
         }
-    }
-
-    private int insertarVenta(Connection conexion) throws SQLException {
-        String consulta = "INSERT INTO venta (fechaVenta, Cliente_idCliente, folioFactura) VALUES (?, ?, ?)";
-
-        PreparedStatement statement = conexion.prepareStatement(consulta, Statement.RETURN_GENERATED_KEYS);
-
-        // Obtener cliente seleccionado
-        Cliente clienteSeleccionado = cbCliente.getSelectionModel().getSelectedItem();
-        Integer idCliente = clienteSeleccionado != null && clienteSeleccionado.getIdCliente() > 0 ?
-                clienteSeleccionado.getIdCliente() : null;
-
-        // Generar folio de factura (formato simple: VENTA-YYYYMMDD-XXXX)
-        LocalDate fecha = dpFechaVenta.getValue();
-        String folio = "VENTA-" + fecha.toString().replace("-", "") + "-" +
-                String.format("%04d", (int)(Math.random() * 10000));
-
-        statement.setDate(1, java.sql.Date.valueOf(fecha));
-
-        if (idCliente != null) {
-            statement.setInt(2, idCliente);
-        } else {
-            statement.setNull(2, java.sql.Types.INTEGER);
-        }
-
-        statement.setString(3, folio);
-
-        statement.executeUpdate();
-
-        ResultSet generatedKeys = statement.getGeneratedKeys();
-        int idVenta = 0;
-
-        if (generatedKeys.next()) {
-            idVenta = generatedKeys.getInt(1);
-        }
-
-        generatedKeys.close();
-        statement.close();
-
-        return idVenta;
-    }
-
-    private void insertarDetallesVenta(Connection conexion, int idVenta) throws SQLException {
-        String consulta = "INSERT INTO detalle_venta (Producto_idProducto, Venta_idVenta, total_pagado, cantidadUnitaria) " +
-                "VALUES (?, ?, ?, ?)";
-
-        PreparedStatement statement = conexion.prepareStatement(consulta);
-
-        for (DetalleVenta detalle : detallesVenta) {
-            statement.setInt(1, detalle.getBebida().getId());
-            statement.setInt(2, idVenta);
-            statement.setDouble(3, detalle.getTotal_pagado());
-            statement.setInt(4, detalle.getCantidadUnitaria());
-
-            statement.executeUpdate();
-        }
-
-        statement.close();
-    }
-
-    private void actualizarStockProductos(Connection conexion) throws SQLException {
-        String consulta = "UPDATE producto SET stock = stock - ? WHERE idProducto = ?";
-
-        PreparedStatement statement = conexion.prepareStatement(consulta);
-
-        for (DetalleVenta detalle : detallesVenta) {
-            statement.setInt(1, detalle.getCantidadUnitaria());
-            statement.setInt(2, detalle.getBebida().getId());
-
-            statement.executeUpdate();
-        }
-
-        statement.close();
-    }
-
-    private void cancelar(ActionEvent event) {
-        cerrarVentana();
-    }
-
-    private void cerrarVentana() {
-        Stage escenario = (Stage) btnCancelar.getScene().getWindow();
-        escenario.close();
-    }
-
-    private void mostrarAlerta(String mensaje, Alert.AlertType tipo) {
-        Alert alerta = new Alert(tipo);
-        alerta.setTitle("Sistema de Gestión de Bebidas");
-        alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
     }
 }

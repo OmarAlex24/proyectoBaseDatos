@@ -2,17 +2,14 @@ package expendiocrudproyecto.controlador.promocion;
 
 import expendiocrudproyecto.controlador.FXMLPrincipalController;
 import expendiocrudproyecto.modelo.ConexionBD;
+import expendiocrudproyecto.modelo.dao.PromocionDAO;
 import expendiocrudproyecto.modelo.pojo.Promocion;
 import expendiocrudproyecto.modelo.pojo.Usuario;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -72,11 +69,14 @@ public class FXMLListaPromocionesController implements Initializable, FXMLPrinci
     private Usuario usuarioSesion;
     private ObservableList<Promocion> promociones;
 
+    private PromocionDAO promocionDAO;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         configurarTabla();
         configurarBotones();
 
+        promocionDAO = new PromocionDAO();
         promociones = FXCollections.observableArrayList();
     }
 
@@ -134,45 +134,13 @@ public class FXMLListaPromocionesController implements Initializable, FXMLPrinci
 
     private void cargarPromociones() {
         try {
-            List<Promocion> listaPromociones = obtenerTodasLasPromociones();
+            List<Promocion> listaPromociones = promocionDAO.leerTodo();
             promociones.clear();
             promociones.addAll(listaPromociones);
             tvPromociones.setItems(promociones);
         } catch (SQLException ex) {
             mostrarAlerta("Error al cargar las promociones: " + ex.getMessage(), Alert.AlertType.ERROR);
         }
-    }
-
-    private List<Promocion> obtenerTodasLasPromociones() throws SQLException {
-        List<Promocion> listaPromociones = new ArrayList<>();
-        Connection conexion = ConexionBD.abrirConexion();
-
-        if (conexion != null) {
-            String consulta = "SELECT idPromocion, nombre, descripcion, descuento, fechaInicio, fechaFin, terminosCondiciones, Producto_idProducto, acumulable FROM promocion";
-            PreparedStatement statement = conexion.prepareStatement(consulta);
-            ResultSet resultado = statement.executeQuery();
-
-            while (resultado.next()) {
-                Promocion promocion = new Promocion();
-                promocion.setIdPromocion(resultado.getInt("idPromocion"));
-                promocion.setNombre(resultado.getString("nombre"));
-                promocion.setDescripcion(resultado.getString("descripcion"));
-                promocion.setDescuento(resultado.getInt("descuento"));
-                promocion.setFechaInicio(resultado.getDate("fechaInicio"));
-                promocion.setFechaFin(resultado.getDate("fechaFin"));
-                promocion.setTerminosCondiciones(resultado.getString("terminosCondiciones"));
-                promocion.setIdProducto(resultado.getInt("Producto_idProducto"));
-                promocion.setAcumulable(resultado.getBoolean("acumulable"));
-
-                listaPromociones.add(promocion);
-            }
-
-            resultado.close();
-            statement.close();
-            conexion.close();
-        }
-
-        return listaPromociones;
     }
 
     private void buscarPromociones(ActionEvent event) {
@@ -182,7 +150,7 @@ public class FXMLListaPromocionesController implements Initializable, FXMLPrinci
             cargarPromociones();
         } else {
             try {
-                List<Promocion> resultadosBusqueda = buscarPromocionesPorNombre(criterioBusqueda);
+                List<Promocion> resultadosBusqueda = promocionDAO.buscarPorNombre(criterioBusqueda);
                 promociones.clear();
                 promociones.addAll(resultadosBusqueda);
                 tvPromociones.setItems(promociones);
@@ -192,40 +160,6 @@ public class FXMLListaPromocionesController implements Initializable, FXMLPrinci
         }
     }
 
-    private List<Promocion> buscarPromocionesPorNombre(String nombre) throws SQLException {
-        List<Promocion> listaPromociones = new ArrayList<>();
-        Connection conexion = ConexionBD.abrirConexion();
-
-        if (conexion != null) {
-            String consulta = "SELECT idPromocion, nombre, descripcion, descuento, fechaInicio, fechaFin, terminosCondiciones, Producto_idProducto, acumulable FROM promocion " +
-                    "WHERE nombre LIKE ?";
-            PreparedStatement statement = conexion.prepareStatement(consulta);
-            statement.setString(1, "%" + nombre + "%");
-
-            ResultSet resultado = statement.executeQuery();
-
-            while (resultado.next()) {
-                Promocion promocion = new Promocion();
-                promocion.setIdPromocion(resultado.getInt("idPromocion"));
-                promocion.setNombre(resultado.getString("nombre"));
-                promocion.setDescripcion(resultado.getString("descripcion"));
-                promocion.setDescuento(resultado.getInt("descuento"));
-                promocion.setFechaInicio(resultado.getDate("fechaInicio"));
-                promocion.setFechaFin(resultado.getDate("fechaFin"));
-                promocion.setTerminosCondiciones(resultado.getString("terminosCondiciones"));
-                promocion.setIdProducto(resultado.getInt("Producto_idProducto"));
-                promocion.setAcumulable(resultado.getBoolean("acumulable"));
-
-                listaPromociones.add(promocion);
-            }
-
-            resultado.close();
-            statement.close();
-            conexion.close();
-        }
-
-        return listaPromociones;
-    }
 
     private void agregarPromocion(ActionEvent event) {
         try {
@@ -284,7 +218,7 @@ public class FXMLListaPromocionesController implements Initializable, FXMLPrinci
 
             if (respuesta.isPresent() && respuesta.get() == ButtonType.OK) {
                 try {
-                    boolean eliminacionExitosa = eliminarPromocionBD(promocionSeleccionada.getIdPromocion());
+                    boolean eliminacionExitosa = promocionDAO.eliminar(promocionSeleccionada.getIdPromocion());
 
                     if (eliminacionExitosa) {
                         mostrarAlerta("Promoción eliminada correctamente", Alert.AlertType.INFORMATION);
@@ -299,25 +233,6 @@ public class FXMLListaPromocionesController implements Initializable, FXMLPrinci
         } else {
             mostrarAlerta("Debe seleccionar una promoción para eliminar", Alert.AlertType.WARNING);
         }
-    }
-
-    private boolean eliminarPromocionBD(int idPromocion) throws SQLException {
-        Connection conexion = ConexionBD.abrirConexion();
-        boolean eliminacionExitosa = false;
-
-        if (conexion != null) {
-            String consulta = "DELETE FROM promocion WHERE idPromocion = ?";
-            PreparedStatement statement = conexion.prepareStatement(consulta);
-            statement.setInt(1, idPromocion);
-
-            int filasAfectadas = statement.executeUpdate();
-            eliminacionExitosa = filasAfectadas > 0;
-
-            statement.close();
-            conexion.close();
-        }
-
-        return eliminacionExitosa;
     }
 
     private void regresar(ActionEvent event) {

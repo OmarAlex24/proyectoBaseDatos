@@ -1,3 +1,10 @@
-/out/
-/dist/
-/build/
+/out/*
+/dist/*
+/build/*
+
+
+
+
+
+
+

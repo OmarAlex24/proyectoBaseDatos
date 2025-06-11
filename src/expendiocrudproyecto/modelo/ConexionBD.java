@@ -16,7 +16,7 @@ public class ConexionBD {
 
     private static final String IP = "127.0.0.1";
     private static final String PUERTO = "3306";
-    private static final String NOMBREBD = "proyectoBebida";
+    private static final String NOMBREBD = "proyectoBebidaFinal";
     private static final String USUARIO = "root";
     private static final String PASSWORD = "Monte1324.";
     private static final String DRIVER = "com.mysql.jdbc.Driver";

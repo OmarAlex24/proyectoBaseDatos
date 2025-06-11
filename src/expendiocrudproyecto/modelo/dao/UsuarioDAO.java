@@ -1,6 +1,5 @@
 package expendiocrudproyecto.modelo.dao;
 
-
 import expendiocrudproyecto.modelo.pojo.TipoUsuario;
 import expendiocrudproyecto.modelo.pojo.Usuario;
 import expendiocrudproyecto.utilidades.HashUtil;
@@ -25,19 +24,23 @@ public class UsuarioDAO {
     }
 
     public Usuario autenticar(String nombre, String contrasenia) throws SQLException {
-        String sql = "SELECT * FROM usuario WHERE username = ? AND contrasenia = ?";
+        String sql = "SELECT * FROM usuario WHERE username = ?";
+
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, nombre);
-            stmt.setString(2, HashUtil.hashPassword(contrasenia));
+
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                Usuario usuario = new Usuario();
-                usuario.setIdUsuario(rs.getInt("idUsuario"));
-                usuario.setUsername(rs.getString("username"));
-                usuario.setContrasenia(rs.getString("contrasenia"));
-                usuario.setTipoUsuario(TipoUsuario.fromId(rs.getInt("idTipoUsuario")));
-                usuario.setIdEmpleado(rs.getInt("idEmpleado"));
-                return usuario;
+                String contraseniaHash = rs.getString("contrasenia");
+                if (HashUtil.hashPassword(contrasenia).equals(contraseniaHash)) {
+                    Usuario usuario = new Usuario();
+                    usuario.setIdUsuario(rs.getInt("idUsuario"));
+                    usuario.setUsername(rs.getString("username"));
+                    usuario.setContrasenia(rs.getString("contrasenia"));
+                    usuario.setTipoUsuario(TipoUsuario.fromId(rs.getInt("idTipoUsuario")));
+                    usuario.setIdEmpleado(rs.getInt("idEmpleado"));
+                    return usuario;
+                }
             }
             return null;
         }

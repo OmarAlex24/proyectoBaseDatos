@@ -76,6 +76,10 @@ public class FXMLPrincipalController implements Initializable {
         if (usuarioSesion.getTipoUsuario() == TipoUsuario.EMPLEADO) {
             btnPromociones.setDisable(true);
             btnPromociones.setVisible(false);
+            btnPedidosMercancia.setVisible(false);
+            btnPedidosMercancia.setDisable(true);
+            btnProveedores.setDisable(true);
+            btnProveedores.setVisible(false);
         }
         // El administrador tiene acceso a todo por defecto
     }

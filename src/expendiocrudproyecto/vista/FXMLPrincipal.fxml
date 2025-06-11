@@ -51,11 +51,12 @@
                         <Font size="14.0" />
                     </font>
                 </Button>
-                <Button fx:id="btnPromociones" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Promociones">
+
+                <Button fx:id="btnProductos" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Productos">
                     <graphic>
                         <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
                             <image>
-<!--                                <Image url="@../recursos/promociones_icon.png" />-->
+                                <!--                                <Image url="@../recursos/productos_icon.png" />-->
                             </image>
                         </ImageView>
                     </graphic>
@@ -66,21 +67,7 @@
                         <Font size="14.0" />
                     </font>
                 </Button>
-                <Button fx:id="btnClientes" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Clientes">
-                    <graphic>
-                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-<!--                                <Image url="@../recursos/clientes_icon.png" />-->
-                            </image>
-                        </ImageView>
-                    </graphic>
-                    <padding>
-                        <Insets left="20.0" />
-                    </padding>
-                    <font>
-                        <Font size="14.0" />
-                    </font>
-                </Button>
+
                 <Button fx:id="btnPedidosCliente" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Pedidos de Clientes">
                     <graphic>
                         <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
@@ -96,6 +83,39 @@
                         <Font size="14.0" />
                     </font>
                 </Button>
+
+                <Button fx:id="btnPromociones" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Promociones">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <!--                                <Image url="@../recursos/promociones_icon.png" />-->
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+
+                <Button fx:id="btnClientes" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Clientes">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <!--                                <Image url="@../recursos/clientes_icon.png" />-->
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+
                 <Button fx:id="btnPedidosMercancia" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Pedidos de Mercancía">
                     <graphic>
                         <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
@@ -111,6 +131,7 @@
                         <Font size="14.0" />
                     </font>
                 </Button>
+
                 <Button fx:id="btnProveedores" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Proveedores">
                     <graphic>
                         <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
@@ -126,26 +147,13 @@
                         <Font size="14.0" />
                     </font>
                 </Button>
-                <Button fx:id="btnProductos" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Productos">
-                    <graphic>
-                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-<!--                                <Image url="@../recursos/productos_icon.png" />-->
-                            </image>
-                        </ImageView>
-                    </graphic>
-                    <padding>
-                        <Insets left="20.0" />
-                    </padding>
-                    <font>
-                        <Font size="14.0" />
-                    </font>
-                </Button>
+
                 <Separator prefWidth="200.0">
                     <VBox.margin>
                         <Insets top="10.0" />
                     </VBox.margin>
                 </Separator>
+
                 <Button fx:id="btnCerrarSesion" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Cerrar Sesión">
                     <graphic>
                         <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">

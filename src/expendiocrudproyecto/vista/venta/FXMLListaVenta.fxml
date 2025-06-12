@@ -58,9 +58,6 @@
                         <TableColumn fx:id="tcFolio" prefWidth="100.0" text="Folio" />
                         <TableColumn fx:id="tcFecha" prefWidth="120.0" text="Fecha" />
                         <TableColumn fx:id="tcCliente" prefWidth="200.0" text="Cliente" />
-                        <TableColumn fx:id="tcEmpleado" prefWidth="200.0" text="Empleado" />
-                        <TableColumn fx:id="tcSubtotal" prefWidth="100.0" text="Subtotal" />
-                        <TableColumn fx:id="tcDescuento" prefWidth="100.0" text="Descuento" />
                         <TableColumn fx:id="tcTotal" prefWidth="100.0" text="Total" />
                         <TableColumn fx:id="tcAcciones" prefWidth="150.0" text="Acciones" />
                     </columns>

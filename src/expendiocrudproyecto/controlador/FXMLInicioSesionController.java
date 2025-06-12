@@ -67,33 +67,38 @@ public class FXMLInicioSesionController implements Initializable {
     }
 
     private void verificarCredenciales(String usuario, String contrasenia) {
-        Connection conexion = ConexionBD.abrirConexion();
+        try {
+            Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
-        if (conexion != null) {
-            try {
-                UsuarioDAO usuarioDAO = new UsuarioDAO(conexion);
-                Usuario usuarioAutenticado = usuarioDAO.autenticar(usuario, contrasenia);
-
-                if (usuarioAutenticado != null) {
-                    this.usuarioSesion = usuarioAutenticado;
-                    irPantallaPrincipal();
-                } else {
-                    mostrarMensajeError("Usuario o contraseña incorrectos");
-                }
-
-            } catch (SQLException ex) {
-                mostrarMensajeError("Error al conectar con la base de datos: " + ex.getMessage());
-                System.out.println("Error al conectar con la base de datos: " + ex.getMessage());
-            } finally {
+            if (conexion != null) {
                 try {
-                    conexion.close();
+                    UsuarioDAO usuarioDAO = new UsuarioDAO(conexion);
+                    Usuario usuarioAutenticado = usuarioDAO.autenticar(usuario, contrasenia);
+
+                    if (usuarioAutenticado != null) {
+                        this.usuarioSesion = usuarioAutenticado;
+                        irPantallaPrincipal();
+                    } else {
+                        mostrarMensajeError("Usuario o contraseña incorrectos");
+                    }
+
                 } catch (SQLException ex) {
-                    System.out.println("Error al cerrar la conexión: " + ex.getMessage());
+                    mostrarMensajeError("Error al conectar con la base de datos: " + ex.getMessage());
+                    System.out.println("Error al conectar con la base de datos: " + ex.getMessage());
+                } finally {
+                    try {
+                        conexion.close();
+                    } catch (SQLException ex) {
+                        System.out.println("Error al cerrar la conexión: " + ex.getMessage());
+                    }
                 }
+            } else {
+                mostrarMensajeError("No se pudo conectar con la base de datos");
             }
-        } else {
+        } catch (SQLException e){
             mostrarMensajeError("No se pudo conectar con la base de datos");
         }
+
     }
 
     private void mostrarMensajeError(String mensaje) {

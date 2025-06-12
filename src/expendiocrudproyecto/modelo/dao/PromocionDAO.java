@@ -16,7 +16,7 @@ public class PromocionDAO implements CrudDAO<Promocion> {
     @Override
     public List<Promocion> leerTodo() throws SQLException {
         List<Promocion> promociones = new ArrayList<>();
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
         if (conexion != null) {
             String consulta = "SELECT idPromocion, nombre, descripcion, descuento, fechaInicio, fechaFin, " +
@@ -40,7 +40,7 @@ public class PromocionDAO implements CrudDAO<Promocion> {
 
     public List<Promocion> buscarPorNombre(String nombre) throws SQLException {
         List<Promocion> listaPromociones = new ArrayList<>();
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
         if (conexion != null) {
             String consulta = "SELECT idPromocion, nombre, descripcion, descuento, fechaInicio, fechaFin, terminosCondiciones, Producto_idProducto, acumulable FROM promocion " +
@@ -64,7 +64,7 @@ public class PromocionDAO implements CrudDAO<Promocion> {
 
     public List<Promocion> leerPromocionesVigentes() throws SQLException {
         List<Promocion> promociones = new ArrayList<>();
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
         if (conexion != null) {
             String consulta = "SELECT idPromocion, nombre, descripcion, descuento, fechaInicio, fechaFin, " +
@@ -91,7 +91,7 @@ public class PromocionDAO implements CrudDAO<Promocion> {
     @Override
     public Promocion leerPorId(Integer id) throws SQLException {
         Promocion promocion = null;
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
         if (conexion != null) {
             String consulta = "SELECT idPromocion, nombre, descripcion, descuento, fechaInicio, fechaFin, " +
@@ -117,7 +117,7 @@ public class PromocionDAO implements CrudDAO<Promocion> {
 
     @Override
     public Promocion insertar(Promocion promocion) throws SQLException {
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
         if (conexion != null) {
             String consulta = "INSERT INTO promocion (descripcion, descuento, fechaInicio, fechaFin, " +
@@ -153,7 +153,7 @@ public class PromocionDAO implements CrudDAO<Promocion> {
 
     @Override
     public boolean actualizar(Promocion promocion) throws SQLException {
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
         boolean operacionExitosa = false;
 
         if (conexion != null) {
@@ -185,7 +185,7 @@ public class PromocionDAO implements CrudDAO<Promocion> {
 
     @Override
     public boolean eliminar(Integer idPromocion) throws SQLException {
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
         boolean operacionExitosa = false;
 
         if (conexion != null) {

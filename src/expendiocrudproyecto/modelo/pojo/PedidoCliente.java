@@ -3,37 +3,81 @@ package expendiocrudproyecto.modelo.pojo;
 import java.util.Date;
 
 public class PedidoCliente {
-    private int idPedidoCliente;
-    private Date fechaPedido;
-    private Cliente cliente;
+  private Integer idPedido;
+  private String folio;
+  private Date fecha;
+  private Integer idCliente;
+  private String nombreCliente;
+  private Double total;
+  private String estado;
 
-    public PedidoCliente(int idPedidoCliente, Date fechaPedido, Cliente cliente) {
-        this.idPedidoCliente = idPedidoCliente;
-        this.fechaPedido = fechaPedido;
-        this.cliente = cliente;
-    }
+  public PedidoCliente() {
+  }
 
-    public int getIdPedidoCliente() {
-        return idPedidoCliente;
-    }
+  public PedidoCliente(Integer idPedido, String folio, Date fecha, Integer idCliente, String nombreCliente,
+      Double total, String estado) {
+    this.idPedido = idPedido;
+    this.folio = folio;
+    this.fecha = fecha;
+    this.idCliente = idCliente;
+    this.nombreCliente = nombreCliente;
+    this.total = total;
+    this.estado = estado;
+  }
 
-    public void setIdPedidoCliente(int idPedidoCliente) {
-        this.idPedidoCliente = idPedidoCliente;
-    }
+  public Integer getIdPedido() {
+    return idPedido;
+  }
 
-    public Date getFechaPedido() {
-        return fechaPedido;
-    }
+  public void setIdPedido(Integer idPedido) {
+    this.idPedido = idPedido;
+  }
 
-    public void setFechaPedido(Date fechaPedido) {
-        this.fechaPedido = fechaPedido;
-    }
+  public String getFolio() {
+    return folio;
+  }
 
-    public Cliente getCliente() {
-        return cliente;
-    }
+  public void setFolio(String folio) {
+    this.folio = folio;
+  }
 
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
+  public Date getFecha() {
+    return fecha;
+  }
+
+  public void setFecha(Date fecha) {
+    this.fecha = fecha;
+  }
+
+  public Integer getIdCliente() {
+    return idCliente;
+  }
+
+  public void setIdCliente(Integer idCliente) {
+    this.idCliente = idCliente;
+  }
+
+  public String getNombreCliente() {
+    return nombreCliente;
+  }
+
+  public void setNombreCliente(String nombreCliente) {
+    this.nombreCliente = nombreCliente;
+  }
+
+  public Double getTotal() {
+    return total;
+  }
+
+  public void setTotal(Double total) {
+    this.total = total;
+  }
+
+  public String getEstado() {
+    return estado;
+  }
+
+  public void setEstado(String estado) {
+    this.estado = estado;
+  }
 }

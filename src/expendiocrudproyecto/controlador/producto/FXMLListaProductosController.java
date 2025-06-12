@@ -29,196 +29,286 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.HBox;
+import javafx.scene.control.ButtonBar;
 
 public class FXMLListaProductosController implements Initializable, FXMLPrincipalController.ControladorConUsuario {
 
-    @FXML
-    private TextField tfBusqueda;
-    @FXML
-    private Button btnBuscar;
-    @FXML
-    private TableView<Bebida> tvProductos;
-    @FXML
-    private TableColumn<Bebida, Integer> tcId;
-    @FXML
-    private TableColumn<Bebida, String> tcNombre;
-    @FXML
-    private TableColumn<Bebida, Float> tcPrecio;
-    @FXML
-    private TableColumn<Bebida, Integer> tcStock;
-    @FXML
-    private TableColumn<Bebida, Integer> tcStockMinimo;
-    @FXML
-    private Button btnAgregar;
-    @FXML
-    private Button btnEditar;
-    @FXML
-    private Button btnEliminar;
-    @FXML
-    private Button btnRegresar;
+  @FXML
+  private TextField tfBusqueda;
+  @FXML
+  private Button btnBuscar;
+  @FXML
+  private TableView<Bebida> tvProductos;
+  @FXML
+  private TableColumn<Bebida, String> tcNombre;
+  @FXML
+  private TableColumn<Bebida, Float> tcPrecio;
+  @FXML
+  private TableColumn<Bebida, Integer> tcStock;
+  @FXML
+  private TableColumn<Bebida, Integer> tcStockMinimo;
+  @FXML
+  private Button btnAgregar;
+  @FXML
+  private Button btnEditar;
+  @FXML
+  private Button btnEliminar;
+  @FXML
+  private Button btnRegresar;
 
-    private Usuario usuarioSesion;
-    private ObservableList<Bebida> productos;
-    private BebidaDAO bebidaDAO;
+  private Usuario usuarioSesion;
+  private ObservableList<Bebida> productos;
+  private BebidaDAO bebidaDAO;
+  private FXMLPrincipalController principalController;
+  private static final String ADMIN_PASSWORD = "admin123";
+  private TableColumn<Bebida, Void> tcAcciones;
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        configurarTabla();
-        configurarBotones();
+  @Override
+  public void initialize(URL url, ResourceBundle rb) {
+    configurarTabla();
+    configurarColumnaAcciones();
+    configurarBotones();
 
-        bebidaDAO = new BebidaDAO();
-        productos = FXCollections.observableArrayList();
+    bebidaDAO = new BebidaDAO();
+    productos = FXCollections.observableArrayList();
+  }
+
+  @Override
+  public void inicializar(Usuario usuario, FXMLPrincipalController principalController) {
+    this.usuarioSesion = usuario;
+    this.principalController = principalController;
+    cargarProductos();
+  }
+
+  private void configurarTabla() {
+    tcNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
+    tcPrecio.setCellValueFactory(cellData -> new SimpleFloatProperty(cellData.getValue().getPrecio()).asObject());
+    tcStock.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getStock()).asObject());
+    tcStockMinimo
+        .setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getStockMinimo()).asObject());
+  }
+
+  private void configurarColumnaAcciones() {
+    tcAcciones = new TableColumn<>("Acciones");
+    tvProductos.getColumns().add(tcAcciones);
+
+    tcAcciones.setCellFactory(col -> new TableCell<Bebida, Void>() {
+      private final Button btnAutorizar = new Button("Autorizar");
+
+      {
+        btnAutorizar.setOnAction(e -> {
+          Bebida bebida = getTableView().getItems().get(getIndex());
+          solicitarAutorizacion(bebida);
+        });
+      }
+
+      @Override
+      protected void updateItem(Void item, boolean empty) {
+        super.updateItem(item, empty);
+        if (empty) {
+          setGraphic(null);
+        } else {
+          setGraphic(btnAutorizar);
+        }
+      }
+    });
+  }
+
+  private void solicitarAutorizacion(Bebida bebida) {
+    Dialog<String> dialog = new Dialog<>();
+    dialog.setTitle("Autorización de administrador");
+    dialog.setHeaderText("Actualizar stock para: " + bebida.getNombre());
+
+    ButtonType okButtonType = new ButtonType("Aceptar", ButtonBar.ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+
+    PasswordField pf = new PasswordField();
+    pf.setPromptText("Contraseña");
+    dialog.getDialogPane().setContent(pf);
+
+    dialog.setResultConverter(dialogButton -> {
+      if (dialogButton == okButtonType) {
+        return pf.getText();
+      }
+      return null;
+    });
+
+    dialog.showAndWait().ifPresent(pass -> {
+      if (ADMIN_PASSWORD.equals(pass)) {
+        pedirNuevoStock(bebida);
+      } else {
+        Alertas.crearAlerta(Alert.AlertType.ERROR, "Contraseña incorrecta", "La contraseña ingresada es incorrecta.");
+      }
+    });
+  }
+
+  private void pedirNuevoStock(Bebida bebida) {
+    TextInputDialog dialog = new TextInputDialog(String.valueOf(bebida.getStock()));
+    dialog.setTitle("Actualizar Stock");
+    dialog.setHeaderText("Nuevo stock para: " + bebida.getNombre());
+    dialog.setContentText("Ingrese el nuevo valor de stock:");
+
+    dialog.showAndWait().ifPresent(valor -> {
+      try {
+        int nuevoStock = Integer.parseInt(valor);
+        if (nuevoStock < 0) {
+          throw new NumberFormatException();
+        }
+        boolean exito = bebidaDAO.actualizarStock(bebida.getId(), nuevoStock);
+        if (exito) {
+          bebida.setStock(nuevoStock);
+          tvProductos.refresh();
+          Alertas.crearAlerta(Alert.AlertType.INFORMATION, "Stock actualizado",
+              "El stock se ha actualizado correctamente.");
+        } else {
+          Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al actualizar",
+              "No se pudo actualizar el stock del producto.");
+        }
+      } catch (NumberFormatException | SQLException ex) {
+        Alertas.crearAlerta(Alert.AlertType.ERROR, "Valor inválido", "Debe ingresar un número entero válido.");
+      }
+    });
+  }
+
+  private void configurarBotones() {
+    // btnBuscar.setOnAction(this::buscarProductos);
+    btnAgregar.setOnAction(this::agregarProducto);
+    btnEditar.setOnAction(this::editarProducto);
+    btnEliminar.setOnAction(this::eliminarProducto);
+    btnRegresar.setOnAction(this::regresar);
+  }
+
+  private void cargarProductos() {
+    try {
+      List<Bebida> listaBebidas = bebidaDAO.leerTodo();
+      productos.clear();
+      productos.addAll(listaBebidas);
+      tvProductos.setItems(productos);
+    } catch (SQLException ex) {
+      Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al cargar productos",
+          "Error al cargar la lista de productos: " + ex.getMessage());
     }
+  }
 
-    @Override
-    public void inicializarUsuario(Usuario usuario) {
-        this.usuarioSesion = usuario;
+  private void buscarProductos(ActionEvent event) {
+    String criterioBusqueda = tfBusqueda.getText().trim();
+
+    if (criterioBusqueda.isEmpty()) {
+      cargarProductos();
+    } else {
+      try {
+        List<Bebida> resultadosBusqueda = bebidaDAO.buscarPorNombre(criterioBusqueda);
+        productos.clear();
+        productos.addAll(resultadosBusqueda);
+        tvProductos.setItems(productos);
+      } catch (SQLException ex) {
+        Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al buscar productos",
+            "Error al buscar productos: " + ex.getMessage());
+      }
+    }
+  }
+
+  private void agregarProducto(ActionEvent event) {
+    try {
+      FXMLLoader loader = new FXMLLoader(App.class.getResource("vista/producto/FXMLFormularioProducto.fxml"));
+      Parent vista = loader.load();
+
+      FXMLFormularioProductoController controller = loader.getController();
+      controller.inicializar(usuarioSesion, principalController);
+      controller.inicializarNuevoProducto();
+
+      Stage stage = new Stage();
+      stage.setScene(new Scene(vista));
+      stage.setTitle("Nuevo Producto");
+      stage.initModality(Modality.APPLICATION_MODAL);
+      stage.showAndWait();
+
+      cargarProductos();
+    } catch (IOException ex) {
+      Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al abrir el formulario",
+          "Error al abrir el formulario de nuevo producto: " + ex.getMessage());
+    }
+  }
+
+  private void editarProducto(ActionEvent event) {
+    Bebida bebidaSeleccionada = tvProductos.getSelectionModel().getSelectedItem();
+
+    if (bebidaSeleccionada != null) {
+      try {
+        FXMLLoader loader = new FXMLLoader(App.class.getResource("vista/producto/FXMLFormularioProducto.fxml"));
+        Parent vista = loader.load();
+
+        FXMLFormularioProductoController controller = loader.getController();
+        controller.inicializar(usuarioSesion, principalController);
+        controller.inicializarEdicionProducto(bebidaSeleccionada);
+
+        Stage stage = new Stage();
+        stage.setScene(new Scene(vista));
+        stage.setTitle("Editar Producto");
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.showAndWait();
+
         cargarProductos();
+      } catch (IOException ex) {
+        Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al abrir el formulario",
+            "Error al abrir el formulario de edición: " + ex.getMessage());
+      }
+    } else {
+      Alertas.crearAlerta(Alert.AlertType.WARNING, "Selección de producto",
+          "Debe seleccionar un producto para editar.");
     }
+  }
 
-    private void configurarTabla() {
-        tcId.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
-        tcNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
-        tcPrecio.setCellValueFactory(cellData -> new SimpleFloatProperty(cellData.getValue().getPrecio()).asObject());
-        tcStock.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getStock()).asObject());
-        tcStockMinimo.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getStockMinimo()).asObject());
-    }
+  private void eliminarProducto(ActionEvent event) {
+    Bebida bebidaSeleccionada = tvProductos.getSelectionModel().getSelectedItem();
 
-    private void configurarBotones() {
-//        btnBuscar.setOnAction(this::buscarProductos);
-        btnAgregar.setOnAction(this::agregarProducto);
-        btnEditar.setOnAction(this::editarProducto);
-        btnEliminar.setOnAction(this::eliminarProducto);
-        btnRegresar.setOnAction(this::regresar);
-    }
+    if (bebidaSeleccionada != null) {
+      Optional<ButtonType> respuesta = mostrarConfirmacion("¿Está seguro que desea eliminar el producto '" +
+          bebidaSeleccionada.getNombre() + "'?");
 
-    private void cargarProductos() {
+      if (respuesta.isPresent() && respuesta.get() == ButtonType.OK) {
         try {
-            List<Bebida> listaBebidas = bebidaDAO.leerTodo();
-            productos.clear();
-            productos.addAll(listaBebidas);
-            tvProductos.setItems(productos);
+          boolean eliminacionExitosa = bebidaDAO.eliminar(bebidaSeleccionada.getId());
+
+          if (eliminacionExitosa) {
+            Alertas.crearAlerta(Alert.AlertType.INFORMATION, "Producto eliminado",
+                "El producto '" + bebidaSeleccionada.getNombre() + "' ha sido eliminado.");
+            cargarProductos();
+          } else {
+            Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al eliminar producto",
+                "No se pudo eliminar el producto '" + bebidaSeleccionada.getNombre() + "'.");
+          }
         } catch (SQLException ex) {
-            Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al cargar productos",
-                    "Error al cargar la lista de productos: " + ex.getMessage());
+          Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al eliminar producto",
+              "Error al eliminar el producto: " + ex.getMessage());
         }
+      }
+    } else {
+      Alertas.crearAlerta(Alert.AlertType.WARNING, "Selección de producto",
+          "Debe seleccionar un producto para eliminar.");
     }
+  }
 
-    private void buscarProductos(ActionEvent event) {
-        String criterioBusqueda = tfBusqueda.getText().trim();
+  private void regresar(ActionEvent event) {
+    principalController.restaurarVistaPrincipal();
+  }
 
-        if (criterioBusqueda.isEmpty()) {
-            cargarProductos();
-        } else {
-            try {
-                List<Bebida> resultadosBusqueda = bebidaDAO.buscarPorNombre(criterioBusqueda);
-                productos.clear();
-                productos.addAll(resultadosBusqueda);
-                tvProductos.setItems(productos);
-            } catch (SQLException ex) {
-                Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al buscar productos",
-                        "Error al buscar productos: " + ex.getMessage());
-            }
-        }
-    }
-
-    private void agregarProducto(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource("vista/producto/FXMLFormularioProducto.fxml"));
-            Parent vista = loader.load();
-
-            FXMLFormularioProductoController controller = loader.getController();
-            controller.inicializarUsuario(usuarioSesion);
-            controller.inicializarNuevoProducto();
-
-            Stage stage = new Stage();
-            stage.setScene(new Scene(vista));
-            stage.setTitle("Nuevo Producto");
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
-
-            cargarProductos();
-        } catch (IOException ex) {
-            Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al abrir el formulario",
-                    "Error al abrir el formulario de nuevo producto: " + ex.getMessage());
-        }
-    }
-
-    private void editarProducto(ActionEvent event) {
-        Bebida bebidaSeleccionada = tvProductos.getSelectionModel().getSelectedItem();
-
-        if (bebidaSeleccionada != null) {
-            try {
-                FXMLLoader loader = new FXMLLoader(App.class.getResource("vista/producto/FXMLFormularioProducto.fxml"));
-                Parent vista = loader.load();
-
-                FXMLFormularioProductoController controller = loader.getController();
-                controller.inicializarUsuario(usuarioSesion);
-                controller.inicializarEdicionProducto(bebidaSeleccionada);
-
-                Stage stage = new Stage();
-                stage.setScene(new Scene(vista));
-                stage.setTitle("Editar Producto");
-                stage.initModality(Modality.APPLICATION_MODAL);
-                stage.showAndWait();
-
-                cargarProductos();
-            } catch (IOException ex) {
-                Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al abrir el formulario",
-                        "Error al abrir el formulario de edición: " + ex.getMessage());
-            }
-        } else {
-            Alertas.crearAlerta(Alert.AlertType.WARNING, "Selección de producto",
-                    "Debe seleccionar un producto para editar.");
-        }
-    }
-
-    private void eliminarProducto(ActionEvent event) {
-        Bebida bebidaSeleccionada = tvProductos.getSelectionModel().getSelectedItem();
-
-        if (bebidaSeleccionada != null) {
-            Optional<ButtonType> respuesta = mostrarConfirmacion("¿Está seguro que desea eliminar el producto '" +
-                    bebidaSeleccionada.getNombre() + "'?");
-
-            if (respuesta.isPresent() && respuesta.get() == ButtonType.OK) {
-                try {
-                    boolean eliminacionExitosa = bebidaDAO.eliminar(bebidaSeleccionada.getId());
-
-                    if (eliminacionExitosa) {
-                        Alertas.crearAlerta(Alert.AlertType.INFORMATION, "Producto eliminado",
-                                "El producto '" + bebidaSeleccionada.getNombre() + "' ha sido eliminado.");
-                        cargarProductos();
-                    } else {
-                        Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al eliminar producto",
-                                "No se pudo eliminar el producto '" + bebidaSeleccionada.getNombre() + "'.");
-                    }
-                } catch (SQLException ex) {
-                    Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al eliminar producto",
-                            "Error al eliminar el producto: " + ex.getMessage());
-                }
-            }
-        } else {
-            Alertas.crearAlerta(Alert.AlertType.WARNING, "Selección de producto",
-                    "Debe seleccionar un producto para eliminar.");
-        }
-    }
-
-    private void regresar(ActionEvent event) {
-        UtilPantallas.regresarPrincipal(event, usuarioSesion, btnRegresar);
-    }
-
-
-
-    private Optional<ButtonType> mostrarConfirmacion(String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
-        alerta.setTitle("Confirmación");
-        alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
-        return alerta.showAndWait();
-    }
+  private Optional<ButtonType> mostrarConfirmacion(String mensaje) {
+    Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
+    alerta.setTitle("Confirmación");
+    alerta.setHeaderText(null);
+    alerta.setContentText(mensaje);
+    return alerta.showAndWait();
+  }
 }

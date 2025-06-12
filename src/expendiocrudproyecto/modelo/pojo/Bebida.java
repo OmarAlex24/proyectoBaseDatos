@@ -78,12 +78,6 @@ public class Bebida {
 
     @Override
     public String toString() {
-        return "Bebida{" +
-                "id=" + id +
-                ", nombre='" + nombre + '\'' +
-                ", precio=" + precio +
-                ", stock=" + stock +
-                ", stockMinimo=" + stockMinimo +
-                '}';
+        return nombre;
     }
 }

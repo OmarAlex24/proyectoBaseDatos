@@ -38,7 +38,6 @@
                 </HBox>
                 <TableView fx:id="tvPromociones" prefHeight="400.0" prefWidth="772.0">
                     <columns>
-                        <TableColumn fx:id="tcId" prefWidth="75.0" text="ID" />
                         <TableColumn fx:id="tcNombre" prefWidth="150.0" text="Nombre" />
                         <TableColumn fx:id="tcDescripcion" prefWidth="200.0" text="Descripción" />
                         <TableColumn fx:id="tcDescuento" prefWidth="100.0" text="Descuento (%)" />

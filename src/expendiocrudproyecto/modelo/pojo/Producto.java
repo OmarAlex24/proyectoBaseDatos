@@ -56,4 +56,9 @@ public class Producto {
     public void setStockMinimo(int stockMinimo) {
         this.stockMinimo = stockMinimo;
     }
+
+    @Override
+    public String toString() {
+        return nombreProducto;
+    }
 }

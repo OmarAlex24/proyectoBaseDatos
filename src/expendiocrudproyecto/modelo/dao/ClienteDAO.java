@@ -15,7 +15,7 @@ public class ClienteDAO implements CrudDAO<Cliente> {
     @Override
     public List<Cliente> leerTodo() throws SQLException {
         List<Cliente> clientes = new ArrayList<>();
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
         if (conexion != null) {
             String consulta = "SELECT idCliente, nombre, telefono, correo, razonSocial FROM cliente";
@@ -39,7 +39,7 @@ public class ClienteDAO implements CrudDAO<Cliente> {
     @Override
     public Cliente leerPorId(Integer id) throws SQLException {
         Cliente cliente = null;
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
         if (conexion != null) {
             String consulta = "SELECT idCliente, nombre, telefono, correo, razonSocial FROM cliente WHERE idCliente = ?";
@@ -63,7 +63,7 @@ public class ClienteDAO implements CrudDAO<Cliente> {
 
     @Override
     public Cliente insertar(Cliente cliente) throws SQLException {
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
         if (conexion != null) {
             String consulta = "INSERT INTO cliente (nombre, telefono, correo, razonSocial) VALUES (?, ?, ?, ?)";
@@ -95,7 +95,7 @@ public class ClienteDAO implements CrudDAO<Cliente> {
 
     @Override
     public boolean actualizar(Cliente cliente) throws SQLException {
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
         boolean operacionExitosa = false;
 
         if (conexion != null) {
@@ -122,7 +122,7 @@ public class ClienteDAO implements CrudDAO<Cliente> {
 
     @Override
     public boolean eliminar(Integer idCliente) throws SQLException {
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
         boolean operacionExitosa = false;
 
         if (conexion != null) {
@@ -150,5 +150,30 @@ public class ClienteDAO implements CrudDAO<Cliente> {
         cliente.setCorreo(resultado.getString("correo"));
         cliente.setRazonSocial(resultado.getString("razonSocial"));
         return cliente;
+    }
+
+    public List<Cliente> buscarPorNombreOApellido(String criterio) throws SQLException {
+        List<Cliente> clientes = new ArrayList<>();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
+
+        if (conexion != null) {
+            String consulta = "SELECT idCliente, nombre, telefono, correo, razonSocial FROM cliente WHERE nombre LIKE ?";
+            PreparedStatement statement = conexion.prepareStatement(consulta);
+            String likeCriterio = "%" + criterio + "%";
+            statement.setString(1, likeCriterio);
+            ResultSet resultado = statement.executeQuery();
+
+            while (resultado.next()) {
+                clientes.add(convertirCliente(resultado));
+            }
+
+            resultado.close();
+            statement.close();
+            conexion.close();
+        } else {
+            throw new SQLException("No se pudo conectar a la base de datos");
+        }
+
+        return clientes;
     }
 }

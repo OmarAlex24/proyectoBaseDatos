@@ -16,7 +16,7 @@ public class ProveedorDAO implements CrudDAO<Proveedor> {
     @Override
     public List<Proveedor> leerTodo() throws SQLException {
         List<Proveedor> proveedores = new ArrayList<>();
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
         if (conexion != null) {
             String consulta = "SELECT idProveedor, razonSocial, telefono, direccion, correo FROM proveedor";
@@ -40,7 +40,7 @@ public class ProveedorDAO implements CrudDAO<Proveedor> {
     @Override
     public Proveedor leerPorId(Integer id) throws SQLException {
         Proveedor proveedor = null;
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
         if (conexion != null) {
             String consulta = "SELECT idProveedor, razonSocial, telefono, direccion, correo FROM proveedor WHERE idProveedor = ?";
@@ -64,7 +64,7 @@ public class ProveedorDAO implements CrudDAO<Proveedor> {
 
     @Override
     public Proveedor insertar(Proveedor proveedor) throws SQLException {
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
         if (conexion != null) {
             String consulta = "INSERT INTO proveedor (razonSocial, telefono, direccion, correo) VALUES (?, ?, ?, ?)";
@@ -96,7 +96,7 @@ public class ProveedorDAO implements CrudDAO<Proveedor> {
 
     public List<Proveedor> buscarPorNombre(String criterio) throws SQLException {
         List<Proveedor> listaProveedores = new ArrayList<>();
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
         if (conexion != null) {
             String consulta = "SELECT idProveedor, razonSocial, telefono, direccion, correo FROM proveedor " +
@@ -128,7 +128,7 @@ public class ProveedorDAO implements CrudDAO<Proveedor> {
 
     @Override
     public boolean actualizar(Proveedor proveedor) throws SQLException {
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
         boolean operacionExitosa = false;
 
         if (conexion != null) {
@@ -155,7 +155,7 @@ public class ProveedorDAO implements CrudDAO<Proveedor> {
 
     @Override
     public boolean eliminar(Integer idProveedor) throws SQLException {
-        Connection conexion = ConexionBD.abrirConexion();
+        Connection conexion = ConexionBD.getInstancia().abrirConexion();
         boolean operacionExitosa = false;
 
         if (conexion != null) {

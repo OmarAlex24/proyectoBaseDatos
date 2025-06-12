@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="expendiocrudproyecto.controlador.pedidocliente.FXMLListaPedidosClienteController">
+    <children>
+        <VBox alignment="TOP_CENTER" layoutX="14.0" layoutY="14.0" prefHeight="672.0" prefWidth="972.0" spacing="15.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+            <children>
+                <Label text="Gestión de Pedidos de Clientes" textFill="#185a9d">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+                <Separator prefWidth="200.0" />
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                    <children>
+                        <Label text="Buscar:">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <TextField fx:id="tfBusqueda" prefHeight="30.0" prefWidth="250.0" promptText="Folio o nombre de cliente" />
+                        <Label text="Desde:">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <DatePicker fx:id="dpFechaInicio" prefHeight="30.0" />
+                        <Label text="Hasta:">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <DatePicker fx:id="dpFechaFin" prefHeight="30.0" />
+                        <Button fx:id="btnBuscar" mnemonicParsing="false" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #185a9d; -fx-text-fill: white;" text="Buscar" />
+                    </children>
+                    <VBox.margin>
+                        <Insets bottom="10.0" top="10.0" />
+                    </VBox.margin>
+                </HBox>
+                <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                    <children>
+                        <Button fx:id="btnNuevoPedido" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #43cea2; -fx-text-fill: white; -fx-font-weight: bold;" text="Nuevo Pedido">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Button>
+                    </children>
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </HBox>
+                <TableView fx:id="tvPedidosCliente" prefHeight="400.0" prefWidth="972.0">
+                    <columns>
+                        <TableColumn fx:id="tcFolio" prefWidth="100.0" text="Folio" />
+                        <TableColumn fx:id="tcFecha" prefWidth="120.0" text="Fecha" />
+                        <TableColumn fx:id="tcCliente" prefWidth="200.0" text="Cliente" />
+                        <TableColumn fx:id="tcTotal" prefWidth="100.0" text="Total" />
+                        <TableColumn fx:id="tcEstado" prefWidth="100.0" text="Estado" />
+                        <TableColumn fx:id="tcAcciones" prefWidth="150.0" text="Acciones" />
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                    </columnResizePolicy>
+                </TableView>
+                <HBox alignment="CENTER" spacing="20.0">
+                    <children>
+                        <Button fx:id="btnRegresar" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;" text="Regresar">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Button>
+                    </children>
+                    <VBox.margin>
+                        <Insets top="20.0" />
+                    </VBox.margin>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane> 

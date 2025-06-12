@@ -3,7 +3,9 @@ package expendiocrudproyecto.controlador.producto;
 import expendiocrudproyecto.App;
 import expendiocrudproyecto.controlador.FXMLPrincipalController;
 import expendiocrudproyecto.modelo.dao.BebidaDAO;
+import expendiocrudproyecto.modelo.dao.UsuarioDAO;
 import expendiocrudproyecto.modelo.pojo.Bebida;
+import expendiocrudproyecto.modelo.pojo.TipoUsuario;
 import expendiocrudproyecto.modelo.pojo.Usuario;
 import java.io.IOException;
 import java.net.URL;
@@ -68,10 +70,10 @@ public class FXMLListaProductosController implements Initializable, FXMLPrincipa
   private Button btnRegresar;
 
   private Usuario usuarioSesion;
+  private UsuarioDAO usuarioDAO ;
   private ObservableList<Bebida> productos;
   private BebidaDAO bebidaDAO;
   private FXMLPrincipalController principalController;
-  private static final String ADMIN_PASSWORD = "admin123";
   private TableColumn<Bebida, Void> tcAcciones;
 
   @Override
@@ -82,6 +84,7 @@ public class FXMLListaProductosController implements Initializable, FXMLPrincipa
 
     bebidaDAO = new BebidaDAO();
     productos = FXCollections.observableArrayList();
+    usuarioDAO = new UsuarioDAO();
   }
 
   @Override
@@ -89,6 +92,21 @@ public class FXMLListaProductosController implements Initializable, FXMLPrincipa
     this.usuarioSesion = usuario;
     this.principalController = principalController;
     cargarProductos();
+    configurarPermisos();
+  }
+
+  private void configurarPermisos() {
+    if (usuarioSesion.getTipoUsuario() == TipoUsuario.EMPLEADO) {
+      // Ocultar y deshabilitar botones para empleados
+      ocultarBoton(btnEditar);
+      ocultarBoton(btnAgregar);
+      ocultarBoton(btnEliminar);
+    }
+    // El administrador tiene acceso completo por defecto
+  }
+  private void ocultarBoton(Button boton) {
+    boton.setVisible(false);
+    boton.setDisable(true);
   }
 
   private void configurarTabla() {
@@ -104,7 +122,7 @@ public class FXMLListaProductosController implements Initializable, FXMLPrincipa
     tvProductos.getColumns().add(tcAcciones);
 
     tcAcciones.setCellFactory(col -> new TableCell<Bebida, Void>() {
-      private final Button btnAutorizar = new Button("Autorizar");
+      private final Button btnAutorizar = new Button("Cambiar stock");
 
       {
         btnAutorizar.setOnAction(e -> {
@@ -145,7 +163,7 @@ public class FXMLListaProductosController implements Initializable, FXMLPrincipa
     });
 
     dialog.showAndWait().ifPresent(pass -> {
-      if (ADMIN_PASSWORD.equals(pass)) {
+      if (usuarioDAO.autorizarStock(pass)) {
         pedirNuevoStock(bebida);
       } else {
         Alertas.crearAlerta(Alert.AlertType.ERROR, "Contraseña incorrecta", "La contraseña ingresada es incorrecta.");

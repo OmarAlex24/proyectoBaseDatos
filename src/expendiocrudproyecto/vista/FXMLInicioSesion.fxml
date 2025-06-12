@@ -39,7 +39,7 @@
 
                 <Button fx:id="btnLogin" style="-fx-background-color: linear-gradient(to right, #43cea2, #185a9d); -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 10; -fx-font-weight: bold; -fx-cursor: hand;" text="Iniciar Sesión" />
 
-                <Label fx:id="lblError" style="-fx-text-fill: #e74c3c; -fx-font-size: 13px;" text="" visible="false" />
+                <Label fx:id="lblError" style="-fx-text-fill: #7f8c8d; -fx-font-size: 13px;" text="" visible="false" />
             </children>
             <padding>
                 <Insets bottom="40" left="30" right="30" top="40" />

@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 import expendiocrudproyecto.utilidades.Alertas;
+import expendiocrudproyecto.utilidades.SesionUsuario;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -72,11 +73,12 @@ public class FXMLInicioSesionController implements Initializable {
 
             if (conexion != null) {
                 try {
-                    UsuarioDAO usuarioDAO = new UsuarioDAO(conexion);
+                    UsuarioDAO usuarioDAO = new UsuarioDAO();
                     Usuario usuarioAutenticado = usuarioDAO.autenticar(usuario, contrasenia);
 
                     if (usuarioAutenticado != null) {
                         this.usuarioSesion = usuarioAutenticado;
+                        SesionUsuario.getInstancia().setUsuarioLogueado(usuarioSesion);
                         irPantallaPrincipal();
                     } else {
                         mostrarMensajeError("Usuario o contraseña incorrectos");

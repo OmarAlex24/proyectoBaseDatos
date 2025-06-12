@@ -99,7 +99,7 @@
             <HBox alignment="CENTER" spacing="20.0">
                <children>
                   <Button fx:id="btnRegistrarPedido" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #43cea2; -fx-text-fill: white;" text="Registrar Pedido" />
-                  <Button fx:id="btnCancelar" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="Cancelar" />
+                  <Button fx:id="btnCancelar" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #7f8c8d; -fx-text-fill: white;" text="Cancelar" />
                </children>
             </HBox>
          </children>

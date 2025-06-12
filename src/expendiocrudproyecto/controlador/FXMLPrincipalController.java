@@ -6,6 +6,8 @@ import expendiocrudproyecto.modelo.pojo.Usuario;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import expendiocrudproyecto.utilidades.SesionUsuario;
 import expendiocrudproyecto.utilidades.UtilPantallas;
 import expendiocrudproyecto.utilidades.Alertas;
 import javafx.event.ActionEvent;
@@ -144,6 +146,7 @@ public class FXMLPrincipalController implements Initializable {
   @FXML
   private void cerrarSesion(ActionEvent event) {
     try {
+      SesionUsuario.getInstancia().cerrarSesion();
       FXMLLoader loader = new FXMLLoader(getClass().getResource("/expendiocrudproyecto/vista/FXMLInicioSesion.fxml"));
       Parent vista = loader.load();
 

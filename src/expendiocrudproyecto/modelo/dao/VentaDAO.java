@@ -17,10 +17,14 @@ public class VentaDAO implements CrudDAO<Venta> {
     private int idProducto;
     private int cantidad;
     private Integer idPromocion; // Puede ser null
+    private double subtotal;
+    private double total_pagado;
 
-    public DetalleVentaJSON(int idProducto, int cantidad) {
+    public DetalleVentaJSON(int idProducto, int cantidad, double subtotal, double total_pagado) {
       this.idProducto = idProducto;
       this.cantidad = cantidad;
+      this.subtotal = subtotal;
+      this.total_pagado = total_pagado;
     }
 
     // Getters y setters
@@ -46,6 +50,22 @@ public class VentaDAO implements CrudDAO<Venta> {
 
     public void setIdPromocion(Integer idPromocion) {
       this.idPromocion = idPromocion;
+    }
+
+    public double getSubtotal() {
+      return subtotal;
+    }
+
+    public void setSubtotal(double subtotal) {
+      this.subtotal = subtotal;
+    }
+
+    public double getTotal_pagado() {
+      return total_pagado;
+    }
+
+    public void setTotal_pagado(double total_pagado) {
+      this.total_pagado = total_pagado;
     }
   }
 
@@ -225,11 +245,16 @@ public class VentaDAO implements CrudDAO<Venta> {
     for (DetalleVenta detalle : detallesVenta) {
       DetalleVentaJSON json = new DetalleVentaJSON(
           detalle.getIdProducto(),
-          detalle.getCantidadUnitaria());
+          detalle.getCantidadUnitaria(),
+          detalle.getSubtotal(),
+          detalle.getTotal_pagado());
 
       // Asignar promoción si corresponde
       if (idPromocion != null && idPromocion > 0) {
         json.setIdPromocion(idPromocion);
+        json.setSubtotal(detalle.getSubtotal());
+        json.setTotal_pagado(detalle.getTotal_pagado());
+        json.setSubtotal(detalle.getSubtotal());
       }
 
       detallesJSON.add(json);
@@ -370,4 +395,5 @@ public class VentaDAO implements CrudDAO<Venta> {
     return "VENTA-" + fecha.toString().replace("-", "") + "-" +
         String.format("%04d", (int) (Math.random() * 10000));
   }
+
 }

@@ -12,6 +12,7 @@ public class Promocion {
     private String terminosCondiciones;
     private int idProducto;
     private boolean acumulable;
+    private int idCliente;
 
 
     public Promocion() {
@@ -27,6 +28,14 @@ public class Promocion {
         this.terminosCondiciones = terminosCondiciones;
         this.idProducto = idProducto;
         this.acumulable = acumulable;
+    }
+
+    public int getIdCliente() {
+        return idCliente;
+    }
+
+    public void setIdCliente(int idCliente) {
+        this.idCliente = idCliente;
     }
 
     public String getNombre() {

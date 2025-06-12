@@ -12,168 +12,168 @@ import java.util.List;
 
 public class ClienteDAO implements CrudDAO<Cliente> {
 
-    @Override
-    public List<Cliente> leerTodo() throws SQLException {
-        List<Cliente> clientes = new ArrayList<>();
-        Connection conexion = ConexionBD.getInstancia().abrirConexion();
+  @Override
+  public List<Cliente> leerTodo() throws SQLException {
+    List<Cliente> clientes = new ArrayList<>();
+    Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
-        if (conexion != null) {
-            String consulta = "SELECT idCliente, nombre, telefono, correo, razonSocial FROM cliente";
-            PreparedStatement statement = conexion.prepareStatement(consulta);
-            ResultSet resultado = statement.executeQuery();
+    if (conexion != null) {
+      String consulta = "SELECT idCliente, nombre, telefono, correo, razonSocial FROM cliente";
+      PreparedStatement statement = conexion.prepareStatement(consulta);
+      ResultSet resultado = statement.executeQuery();
 
-            while (resultado.next()) {
-                clientes.add(convertirCliente(resultado));
-            }
+      while (resultado.next()) {
+        clientes.add(convertirCliente(resultado));
+      }
 
-            resultado.close();
-            statement.close();
-            conexion.close();
-        } else {
-            throw new SQLException("No se pudo conectar a la base de datos");
+      resultado.close();
+      statement.close();
+      conexion.close();
+    } else {
+      throw new SQLException("No se pudo conectar a la base de datos");
+    }
+
+    return clientes;
+  }
+
+  @Override
+  public Cliente leerPorId(Integer id) throws SQLException {
+    Cliente cliente = null;
+    Connection conexion = ConexionBD.getInstancia().abrirConexion();
+
+    if (conexion != null) {
+      String consulta = "SELECT idCliente, nombre, telefono, correo, razonSocial FROM cliente WHERE idCliente = ?";
+      PreparedStatement statement = conexion.prepareStatement(consulta);
+      statement.setInt(1, id);
+      ResultSet resultado = statement.executeQuery();
+
+      if (resultado.next()) {
+        cliente = convertirCliente(resultado);
+      }
+
+      resultado.close();
+      statement.close();
+      conexion.close();
+    } else {
+      throw new SQLException("No se pudo conectar a la base de datos");
+    }
+
+    return cliente;
+  }
+
+  @Override
+  public Cliente insertar(Cliente cliente) throws SQLException {
+    Connection conexion = ConexionBD.getInstancia().abrirConexion();
+
+    if (conexion != null) {
+      String consulta = "INSERT INTO cliente (nombre, telefono, correo, razonSocial) VALUES (?, ?, ?, ?)";
+
+      PreparedStatement statement = conexion.prepareStatement(consulta, Statement.RETURN_GENERATED_KEYS);
+      statement.setString(1, cliente.getNombre());
+      statement.setString(2, cliente.getTelefono());
+      statement.setString(3, cliente.getCorreo());
+      statement.setString(4, cliente.getRazonSocial());
+
+      int filasInsertadas = statement.executeUpdate();
+
+      if (filasInsertadas > 0) {
+        ResultSet generatedKeys = statement.getGeneratedKeys();
+        if (generatedKeys.next()) {
+          cliente.setIdCliente(generatedKeys.getInt(1));
         }
+        generatedKeys.close();
+      }
 
-        return clientes;
+      statement.close();
+      conexion.close();
+    } else {
+      throw new SQLException("No se pudo conectar a la base de datos");
     }
 
-    @Override
-    public Cliente leerPorId(Integer id) throws SQLException {
-        Cliente cliente = null;
-        Connection conexion = ConexionBD.getInstancia().abrirConexion();
+    return cliente;
+  }
 
-        if (conexion != null) {
-            String consulta = "SELECT idCliente, nombre, telefono, correo, razonSocial FROM cliente WHERE idCliente = ?";
-            PreparedStatement statement = conexion.prepareStatement(consulta);
-            statement.setInt(1, id);
-            ResultSet resultado = statement.executeQuery();
+  @Override
+  public boolean actualizar(Cliente cliente) throws SQLException {
+    Connection conexion = ConexionBD.getInstancia().abrirConexion();
+    boolean operacionExitosa = false;
 
-            if (resultado.next()) {
-                cliente = convertirCliente(resultado);
-            }
+    if (conexion != null) {
+      String consulta = "UPDATE cliente SET nombre = ?, telefono = ?, correo = ?, razonSocial = ? WHERE idCliente = ?";
 
-            resultado.close();
-            statement.close();
-            conexion.close();
-        } else {
-            throw new SQLException("No se pudo conectar a la base de datos");
-        }
+      PreparedStatement statement = conexion.prepareStatement(consulta);
+      statement.setString(1, cliente.getNombre());
+      statement.setString(2, cliente.getTelefono());
+      statement.setString(3, cliente.getCorreo());
+      statement.setString(4, cliente.getRazonSocial());
+      statement.setInt(5, cliente.getIdCliente());
 
-        return cliente;
+      int filasActualizadas = statement.executeUpdate();
+      operacionExitosa = filasActualizadas > 0;
+
+      statement.close();
+      conexion.close();
+    } else {
+      throw new SQLException("No se pudo conectar a la base de datos");
     }
 
-    @Override
-    public Cliente insertar(Cliente cliente) throws SQLException {
-        Connection conexion = ConexionBD.getInstancia().abrirConexion();
+    return operacionExitosa;
+  }
 
-        if (conexion != null) {
-            String consulta = "INSERT INTO cliente (nombre, telefono, correo, razonSocial) VALUES (?, ?, ?, ?)";
+  @Override
+  public boolean eliminar(Integer idCliente) throws SQLException {
+    Connection conexion = ConexionBD.getInstancia().abrirConexion();
+    boolean operacionExitosa = false;
 
-            PreparedStatement statement = conexion.prepareStatement(consulta, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, cliente.getNombre());
-            statement.setString(2, cliente.getTelefono());
-            statement.setString(3, cliente.getCorreo());
-            statement.setString(4, cliente.getRazonSocial());
+    if (conexion != null) {
+      String consulta = "DELETE FROM cliente WHERE idCliente =  ?";
+      PreparedStatement statement = conexion.prepareStatement(consulta);
+      statement.setInt(1, idCliente);
 
-            int filasInsertadas = statement.executeUpdate();
+      int filasEliminadas = statement.executeUpdate();
+      operacionExitosa = filasEliminadas > 0;
 
-            if (filasInsertadas > 0) {
-                ResultSet generatedKeys = statement.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    cliente.setIdCliente(generatedKeys.getInt(1));
-                }
-                generatedKeys.close();
-            }
-
-            statement.close();
-            conexion.close();
-        } else {
-            throw new SQLException("No se pudo conectar a la base de datos");
-        }
-
-        return cliente;
+      statement.close();
+      conexion.close();
+    } else {
+      throw new SQLException("No se pudo conectar a la base de datos");
     }
 
-    @Override
-    public boolean actualizar(Cliente cliente) throws SQLException {
-        Connection conexion = ConexionBD.getInstancia().abrirConexion();
-        boolean operacionExitosa = false;
+    return operacionExitosa;
+  }
 
-        if (conexion != null) {
-            String consulta = "UPDATE cliente SET nombre = ?, telefono = ?, correo = ?, razonSocial = ? WHERE idCliente = ?";
+  private Cliente convertirCliente(ResultSet resultado) throws SQLException {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(resultado.getInt("idCliente"));
+    cliente.setNombre(resultado.getString("nombre"));
+    cliente.setTelefono(resultado.getString("telefono"));
+    cliente.setCorreo(resultado.getString("correo"));
+    cliente.setRazonSocial(resultado.getString("razonSocial"));
+    return cliente;
+  }
 
-            PreparedStatement statement = conexion.prepareStatement(consulta);
-            statement.setString(1, cliente.getNombre());
-            statement.setString(2, cliente.getTelefono());
-            statement.setString(3, cliente.getCorreo());
-            statement.setString(4, cliente.getRazonSocial());
-            statement.setInt(5, cliente.getIdCliente());
+  public List<Cliente> buscarPorNombreOApellido(String criterio) throws SQLException {
+    List<Cliente> clientes = new ArrayList<>();
+    Connection conexion = ConexionBD.getInstancia().abrirConexion();
 
-            int filasActualizadas = statement.executeUpdate();
-            operacionExitosa = filasActualizadas > 0;
+    if (conexion != null) {
+      String consulta = "SELECT idCliente, nombre, telefono, correo, razonSocial FROM cliente WHERE nombre LIKE ?";
+      PreparedStatement statement = conexion.prepareStatement(consulta);
+      String likeCriterio = "%" + criterio + "%";
+      statement.setString(1, likeCriterio);
+      ResultSet resultado = statement.executeQuery();
 
-            statement.close();
-            conexion.close();
-        } else {
-            throw new SQLException("No se pudo conectar a la base de datos");
-        }
+      while (resultado.next()) {
+        clientes.add(convertirCliente(resultado));
+      }
 
-        return operacionExitosa;
+      resultado.close();
+      statement.close();
+      conexion.close();
+    } else {
+      throw new SQLException("No se pudo conectar a la base de datos");
     }
 
-    @Override
-    public boolean eliminar(Integer idCliente) throws SQLException {
-        Connection conexion = ConexionBD.getInstancia().abrirConexion();
-        boolean operacionExitosa = false;
-
-        if (conexion != null) {
-            String consulta = "DELETE FROM cliente WHERE idCliente =  ?";
-            PreparedStatement statement = conexion.prepareStatement(consulta);
-            statement.setInt(1, idCliente);
-
-            int filasEliminadas = statement.executeUpdate();
-            operacionExitosa = filasEliminadas > 0;
-
-            statement.close();
-            conexion.close();
-        } else {
-            throw new SQLException("No se pudo conectar a la base de datos");
-        }
-
-        return operacionExitosa;
-    }
-
-    private Cliente convertirCliente(ResultSet resultado) throws SQLException {
-        Cliente cliente = new Cliente();
-        cliente.setIdCliente(resultado.getInt("idCliente"));
-        cliente.setNombre(resultado.getString("nombre"));
-        cliente.setTelefono(resultado.getString("telefono"));
-        cliente.setCorreo(resultado.getString("correo"));
-        cliente.setRazonSocial(resultado.getString("razonSocial"));
-        return cliente;
-    }
-
-    public List<Cliente> buscarPorNombreOApellido(String criterio) throws SQLException {
-        List<Cliente> clientes = new ArrayList<>();
-        Connection conexion = ConexionBD.getInstancia().abrirConexion();
-
-        if (conexion != null) {
-            String consulta = "SELECT idCliente, nombre, telefono, correo, razonSocial FROM cliente WHERE nombre LIKE ?";
-            PreparedStatement statement = conexion.prepareStatement(consulta);
-            String likeCriterio = "%" + criterio + "%";
-            statement.setString(1, likeCriterio);
-            ResultSet resultado = statement.executeQuery();
-
-            while (resultado.next()) {
-                clientes.add(convertirCliente(resultado));
-            }
-
-            resultado.close();
-            statement.close();
-            conexion.close();
-        } else {
-            throw new SQLException("No se pudo conectar a la base de datos");
-        }
-
-        return clientes;
-    }
+    return clientes;
+  }
 }

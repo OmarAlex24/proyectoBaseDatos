@@ -3,6 +3,7 @@ package expendiocrudproyecto.controlador.proveedor;
 import expendiocrudproyecto.controlador.FXMLPrincipalController;
 import expendiocrudproyecto.modelo.dao.ProveedorDAO;
 import expendiocrudproyecto.modelo.pojo.Proveedor;
+import expendiocrudproyecto.modelo.pojo.TipoUsuario;
 import expendiocrudproyecto.modelo.pojo.Usuario;
 import java.io.IOException;
 import java.net.URL;
@@ -75,6 +76,21 @@ public class FXMLListaProveedoresController implements Initializable, FXMLPrinci
     this.usuarioSesion = usuario;
     this.principalController = principalController;
     cargarProveedores();
+    configurarPermisos();
+  }
+
+  private void configurarPermisos() {
+    if (usuarioSesion.getTipoUsuario() == TipoUsuario.EMPLEADO) {
+      // Ocultar y deshabilitar botones para empleados
+      ocultarBoton(btnEditar);
+      ocultarBoton(btnAgregar);
+      ocultarBoton(btnEliminar);
+    }
+    // El administrador tiene acceso completo por defecto
+  }
+  private void ocultarBoton(Button boton) {
+    boton.setVisible(false);
+    boton.setDisable(true);
   }
 
   private void configurarTabla() {

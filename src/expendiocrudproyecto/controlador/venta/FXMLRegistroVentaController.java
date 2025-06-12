@@ -3,15 +3,13 @@ package expendiocrudproyecto.controlador.venta;
 import expendiocrudproyecto.controlador.FXMLPrincipalController;
 import expendiocrudproyecto.modelo.dao.BebidaDAO;
 import expendiocrudproyecto.modelo.dao.PromocionDAO;
+import expendiocrudproyecto.modelo.dao.ReporteDAO;
 import expendiocrudproyecto.modelo.dao.VentaDAO;
-import expendiocrudproyecto.modelo.pojo.Bebida;
-import expendiocrudproyecto.modelo.pojo.Cliente;
-import expendiocrudproyecto.modelo.pojo.DetalleVenta;
-import expendiocrudproyecto.modelo.pojo.Promocion;
-import expendiocrudproyecto.modelo.pojo.Usuario;
-import expendiocrudproyecto.modelo.pojo.Venta;
+import expendiocrudproyecto.modelo.pojo.*;
+
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -92,6 +90,7 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
   private double subtotal = 0.0;
   private double descuento = 0.0;
   private double total = 0.0;
+  private ReporteDAO reporteDAO;
 
   @Override
   public void initialize(URL url, ResourceBundle rb) {
@@ -103,6 +102,7 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
     bebidaDAO = new BebidaDAO();
     promocionDAO = new PromocionDAO();
     ventaDAO = new VentaDAO();
+    reporteDAO = new ReporteDAO();
 
     clientes = FXCollections.observableArrayList();
     promociones = FXCollections.observableArrayList();
@@ -125,6 +125,7 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
     cbPromocion.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
       actualizarDescuento();
     });
+    configurarListeners();
   }
 
   @Override
@@ -136,6 +137,82 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
 
   private void configurarFechaActual() {
     dpFechaVenta.setValue(LocalDate.now());
+  }
+
+  private void configurarListeners() {
+    cbCliente.valueProperty().addListener((obs, oldVal, newVal) -> {
+      if (newVal != null) {
+        cargarPromocionesDisponibles();
+        verificarPromocionEspecial();
+      } else {
+        cbCliente.getItems().clear();
+      }
+    });
+
+    cbProducto.valueProperty().addListener((obs, oldVal, newVal) -> {
+      if (newVal != null) {
+        verificarPromocionEspecial();
+      }
+    });
+
+  }
+
+  private void cargarPromocionesDisponibles() {
+    Cliente clienteSeleccionado = cbCliente.getValue();
+    if (clienteSeleccionado != null) {
+      LocalDate fechaActual = LocalDate.now();
+      Date fecha = Date.from(Instant.from(fechaActual));
+      // Carga las promociones estándar
+      ArrayList<Promocion> promociones = promocionDAO.buscarPromociones((java.sql.Date) fecha,
+          clienteSeleccionado.getIdCliente());
+      cbPromocion.setItems(FXCollections.observableArrayList(promociones));
+    }
+  }
+
+  /**
+   * Verifica si el producto seleccionado es el más comprado por el cliente
+   * y, de ser así, busca y aplica la promoción especial con ID 0.
+   */
+  private void verificarPromocionEspecial() {
+    Cliente clienteSeleccionado = cbCliente.getValue();
+    Bebida productoSeleccionado = cbProducto.getValue();
+
+    // Solo proceder si se ha seleccionado un cliente y un producto
+    if (clienteSeleccionado != null && productoSeleccionado != null) {
+      Integer idProductoMasComprado = reporteDAO
+          .obtenerIdProductoMasCompradoPorCliente(clienteSeleccionado.getIdCliente());
+
+      if (idProductoMasComprado != null && idProductoMasComprado.equals(productoSeleccionado.getId())) {
+        // Es el producto más comprado, obtener la promoción especial (ID 0)
+        Promocion promocionEspecial;
+        try {
+          promocionEspecial = promocionDAO.leerPorId(0);
+
+        } catch (SQLException e) {
+          Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al verificar promoción especial",
+              "No se pudo verificar la promoción especial: " + e.getMessage());
+          return;
+        }
+
+        if (promocionEspecial != null) {
+          // Verificar si la promoción ya está en la lista para no duplicarla
+          boolean existe = cbPromocion.getItems().stream()
+              .anyMatch(p -> p.getIdPromocion() == promocionEspecial.getIdPromocion());
+
+          if (!existe) {
+            cbPromocion.getItems().add(promocionEspecial);
+          }
+
+          // Seleccionar automáticamente la promoción especial
+          cbPromocion.setValue(promocionEspecial);
+
+          // Notificar al usuario 🥳
+          Alertas.crearAlerta(Alert.AlertType.INFORMATION, "¡Promoción Especial!",
+              "Se aplicó la promoción '" + promocionEspecial.getNombre()
+                  + "' por ser el producto favorito de este cliente.");
+        }
+      }
+    }
   }
 
   private void configurarSpinner() {
@@ -274,7 +351,7 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
 
       // Agregar opción "Sin promoción"
       Promocion sinPromocion = new Promocion();
-      sinPromocion.setIdPromocion(0);
+      sinPromocion.setIdPromocion(-1);
       sinPromocion.setNombre("Sin promoción");
       sinPromocion.setDescuento(0);
       promociones.add(sinPromocion);
@@ -384,7 +461,8 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
   private void actualizarDescuento() {
     Promocion promocionSeleccionada = cbPromocion.getSelectionModel().getSelectedItem();
 
-    if (promocionSeleccionada != null && promocionSeleccionada.getIdPromocion() > 0) {
+    // Aplicar descuento cuando el porcentaje sea mayor a 0
+    if (promocionSeleccionada != null && promocionSeleccionada.getDescuento() > 0) {
       descuento = subtotal * (promocionSeleccionada.getDescuento() / 100.0);
     } else {
       descuento = 0.0;
@@ -417,8 +495,21 @@ public class FXMLRegistroVentaController implements Initializable, FXMLPrincipal
       // Obtener promoción seleccionada (puede ser "Sin promoción")
       Integer idPromocion = null;
       Promocion promoSeleccionada = cbPromocion.getValue();
-      if (promoSeleccionada != null && promoSeleccionada.getIdPromocion() > 0) {
+      if (promoSeleccionada != null && promoSeleccionada.getIdPromocion() != -1) {
         idPromocion = promoSeleccionada.getIdPromocion();
+      }
+
+      // Si existe un porcentaje de descuento, aplicarlo a cada detalle antes de
+      // enviarlo al DAO
+      double porcentajeDescuento = (promoSeleccionada != null) ? promoSeleccionada.getDescuento() : 0.0;
+
+      if (porcentajeDescuento > 0) {
+        for (DetalleVenta detalle : detalles) {
+          double totalSinDesc = detalle.getPrecioUnitario() * detalle.getCantidadUnitaria();
+          double totalConDesc = totalSinDesc * (1 - porcentajeDescuento / 100.0);
+          detalle.setSubtotal(totalSinDesc);
+          detalle.setTotal_pagado(totalConDesc);
+        }
       }
 
       // Llamar al procedimiento con la promoción (si la hay)

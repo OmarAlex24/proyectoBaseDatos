@@ -144,7 +144,7 @@
                                 <Font size="14.0" />
                             </font>
                         </Button>
-                        <Button fx:id="btnCancelar" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;" text="Cancelar">
+                        <Button fx:id="btnCancelar" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-font-weight: bold;" text="Cancelar">
                             <font>
                                 <Font size="14.0" />
                             </font>

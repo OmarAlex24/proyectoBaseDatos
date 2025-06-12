@@ -2,6 +2,9 @@ package expendiocrudproyecto.modelo.dao;
 
 import expendiocrudproyecto.modelo.ConexionBD;
 import expendiocrudproyecto.modelo.pojo.Promocion;
+import expendiocrudproyecto.utilidades.Alertas;
+import javafx.scene.control.Alert;
+
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -217,5 +220,42 @@ public class PromocionDAO implements CrudDAO<Promocion> {
         promocion.setIdProducto(resultado.getInt("idProducto"));
         promocion.setAcumulable(resultado.getBoolean("acumulable"));
         return promocion;
+    }
+
+    public ArrayList<Promocion> buscarPromociones(Date fecha, int idCliente) {
+        ArrayList<Promocion> promociones = new ArrayList<>();
+        ConexionBD conexionBD = ConexionBD.getInstancia();
+        // La consulta busca promociones donde la fecha actual esté dentro del rango de vigencia
+        // y que sean generales (Cliente_idCliente IS NULL) o específicas para el cliente dado.
+        String consulta = "SELECT * FROM promocion WHERE ? BETWEEN fechaInicio AND fechaFin AND (Cliente_idCliente = ? OR Cliente_idCliente IS NULL)";
+
+        try (Connection conexion = conexionBD.abrirConexion();
+             PreparedStatement ps = conexion.prepareStatement(consulta)) {
+
+            ps.setDate(1, fecha);
+            ps.setInt(2, idCliente);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Promocion promocion = new Promocion();
+                    promocion.setIdPromocion(rs.getInt("idPromocion"));
+                    promocion.setNombre(rs.getString("nombre"));
+                    promocion.setDescripcion(rs.getString("descripcion"));
+                    promocion.setFechaInicio(rs.getDate("fechaInicio"));
+                    promocion.setFechaFin(rs.getDate("fechaFin"));
+                    promocion.setDescuento(rs.getInt("porcentajeDescuento"));
+
+                    int clienteId = rs.getInt("Cliente_idCliente");
+                    if (!rs.wasNull()) {
+                        promocion.setIdCliente(clienteId);
+                    }
+                    promociones.add(promocion);
+                }
+            }
+        } catch (SQLException ex) {
+            Alertas.crearAlerta(Alert.AlertType.ERROR, "Error al buscar promociones",
+                    "No se pudieron recuperar las promociones: " + ex.getMessage());
+        }
+        return promociones;
     }
 }

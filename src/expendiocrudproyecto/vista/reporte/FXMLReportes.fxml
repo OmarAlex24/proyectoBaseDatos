@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="expendiocrudproyecto.controlador.reporte.FXMLReportesController">
+<AnchorPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="expendiocrudproyecto.controlador.reporte.FXMLReportesController">
     <children>
-        <VBox prefHeight="700.0" prefWidth="1200.0" spacing="10.0">
+        <VBox prefHeight="700.0" prefWidth="943.0" spacing="10.0">
             <children>
-                <!-- Título Principal -->
-                <HBox alignment="CENTER" prefHeight="60.0">
+                <HBox alignment="CENTER" maxWidth="1200.0" prefHeight="60.0">
                     <children>
                         <Label text="Sistema de Reportes - Expendio de Bebidas" textFill="#2c3e50">
                             <font>
@@ -20,15 +19,12 @@
                     </children>
                 </HBox>
 
-                <!-- TabPane con todos los reportes -->
                 <TabPane prefHeight="620.0" prefWidth="1180.0" tabClosingPolicy="UNAVAILABLE">
 
-                    <!-- TAB 1: VENTAS POR PERÍODO -->
                     <Tab text="Ventas por Período">
                         <content>
                             <VBox spacing="15.0">
                                 <children>
-                                    <!-- Controles de filtros -->
                                     <HBox alignment="CENTER_LEFT" spacing="20.0">
                                         <children>
                                             <Label text="Fecha Inicio:" />
@@ -42,14 +38,13 @@
                                                     -fx-background-color: #3498db; -fx-text-fill: white;
                                                 </style>
                                             </Button>
+                                            <Button fx:id="btnExportarVentasPeriodo" layoutX="575.0" layoutY="10.0" mnemonicParsing="false" onAction="#exportarReporteVentasPeriodo" text="Exportar a PDF" />
                                         </children>
                                     </HBox>
 
-                                    <!-- Tabla de resultados -->
                                     <TableView fx:id="tblVentasPeriodo" prefHeight="500.0">
                                         <columns>
                                             <TableColumn fx:id="colPeriodo" prefWidth="120.0" text="Periodo" />
-                                            <TableColumn fx:id="colFechaVenta" prefWidth="120.0" text="Fecha Venta" />
                                             <TableColumn fx:id="colTotalPedidos" prefWidth="120.0" text="Total Pedidos" />
                                             <TableColumn fx:id="colTotalVentas" prefWidth="150.0" text="Total Ventas" />
                                         </columns>
@@ -62,12 +57,10 @@
                         </content>
                     </Tab>
 
-                    <!-- TAB 2: VENTAS POR PRODUCTO -->
                     <Tab text="Ventas por Producto">
                         <content>
                             <VBox spacing="15.0">
                                 <children>
-                                    <!-- Controles de filtros -->
                                     <HBox alignment="CENTER_LEFT" spacing="20.0">
                                         <children>
                                             <Label text="Fecha Inicio:" />
@@ -81,14 +74,13 @@
                                                     -fx-background-color: #27ae60; -fx-text-fill: white;
                                                 </style>
                                             </Button>
+                                            <Button fx:id="btnExportarVentasProducto" layoutX="765.0" layoutY="10.0" mnemonicParsing="false" onAction="#exportarReporteVentasProducto" text="Exportar a PDF" />
                                         </children>
                                     </HBox>
 
-                                    <!-- Tabla de resultados -->
                                     <TableView fx:id="tblVentasProducto" prefHeight="500.0">
                                         <columns>
                                             <TableColumn fx:id="colNombreProducto" prefWidth="200.0" text="Producto" />
-                                            <TableColumn fx:id="colCategoriaProducto" prefWidth="120.0" text="Categoría" />
                                             <TableColumn fx:id="colCantidadVendida" prefWidth="120.0" text="Cantidad Vendida" />
                                             <TableColumn fx:id="colPrecioUnitario" prefWidth="120.0" text="Precio Unitario" />
                                             <TableColumn fx:id="colTotalVentasProducto" prefWidth="150.0" text="Total Ventas" />
@@ -102,32 +94,29 @@
                         </content>
                     </Tab>
 
-                    <!-- TAB 3: STOCK MÍNIMO -->
                     <Tab text="Stock Mínimo">
                         <content>
                             <VBox spacing="15.0">
                                 <children>
-                                    <!-- Controles -->
                                     <HBox alignment="CENTER_LEFT" spacing="20.0">
                                         <children>
                                             <Button fx:id="btnGenerarStockMinimo" mnemonicParsing="false" text="Generar Reporte de Stock">
                                                 <style>
-                                                    -fx-background-color: #e74c3c; -fx-text-fill: white;
+                                                    -fx-background-color: #7f8c8d; -fx-text-fill: white;
                                                 </style>
                                             </Button>
-                                            <Label text="Productos con stock bajo o crítico" textFill="#e74c3c">
+                                            <Label text="Productos con stock bajo o crítico" textFill="#7f8c8d">
                                                 <font>
                                                     <Font name="System Italic" size="12.0" />
                                                 </font>
                                             </Label>
+                                            <Button fx:id="btnExportarStockMinimo" layoutX="185.0" layoutY="10.0" mnemonicParsing="false" onAction="#exportarReporteStockMinimo" text="Exportar a PDF" />
                                         </children>
                                     </HBox>
 
-                                    <!-- Tabla de resultados -->
                                     <TableView fx:id="tblStockMinimo" prefHeight="500.0">
                                         <columns>
                                             <TableColumn fx:id="colNombreStock" prefWidth="200.0" text="Producto" />
-                                            <TableColumn fx:id="colCategoriaStock" prefWidth="120.0" text="Categoría" />
                                             <TableColumn fx:id="colStockActual" prefWidth="100.0" text="Stock Actual" />
                                             <TableColumn fx:id="colStockMinimo" prefWidth="100.0" text="Stock Mínimo" />
                                             <TableColumn fx:id="colDiferencia" prefWidth="100.0" text="Diferencia" />
@@ -142,12 +131,10 @@
                         </content>
                     </Tab>
 
-                    <!-- TAB 4: PRODUCTOS MÁS VENDIDOS -->
                     <Tab text="Más Vendidos">
                         <content>
                             <VBox spacing="15.0">
                                 <children>
-                                    <!-- Controles de filtros -->
                                     <HBox alignment="CENTER_LEFT" spacing="20.0">
                                         <children>
                                             <Label text="Fecha Inicio:" />
@@ -160,17 +147,15 @@
                                                     -fx-background-color: #f39c12; -fx-text-fill: white;
                                                 </style>
                                             </Button>
+                                            <Button fx:id="btnExportarMasVendidos" layoutX="490.0" layoutY="10.0" mnemonicParsing="false" onAction="#exportarReporteMasVendidos" text="Exportar a PDF" />
                                         </children>
                                     </HBox>
 
-                                    <!-- Tabla de resultados -->
                                     <TableView fx:id="tblProductosMasVendidos" prefHeight="500.0">
                                         <columns>
                                             <TableColumn fx:id="colPosicionMas" prefWidth="80.0" text="Pos." />
                                             <TableColumn fx:id="colNombreMasVendido" prefWidth="200.0" text="Producto" />
-                                            <TableColumn fx:id="colCantidadMasVendido" prefWidth="120.0" text="Cantidad" />
                                             <TableColumn fx:id="colTotalMasVendido" prefWidth="150.0" text="Total Ventas" />
-                                            <TableColumn fx:id="colPorcentajeMasVendido" prefWidth="120.0" text="Porcentaje" />
                                         </columns>
                                     </TableView>
                                 </children>
@@ -181,12 +166,10 @@
                         </content>
                     </Tab>
 
-                    <!-- TAB 5: PRODUCTOS MENOS VENDIDOS -->
                     <Tab text="Menos Vendidos">
                         <content>
                             <VBox spacing="15.0">
                                 <children>
-                                    <!-- Controles de filtros -->
                                     <HBox alignment="CENTER_LEFT" spacing="20.0">
                                         <children>
                                             <Label text="Fecha Inicio:" />
@@ -199,10 +182,10 @@
                                                     -fx-background-color: #8e44ad; -fx-text-fill: white;
                                                 </style>
                                             </Button>
+                                            <Button fx:id="btnExportarMenosVendidos" layoutX="490.0" layoutY="10.0" mnemonicParsing="false" onAction="#exportarReporteMenosVendidos" text="Exportar a PDF" />
                                         </children>
                                     </HBox>
 
-                                    <!-- Tabla de resultados -->
                                     <TableView fx:id="tblProductosMenosVendidos" prefHeight="500.0">
                                         <columns>
                                             <TableColumn fx:id="colPosicionMenos" prefWidth="80.0" text="Pos." />
@@ -219,12 +202,10 @@
                         </content>
                     </Tab>
 
-                    <!-- TAB 6: PRODUCTOS NO VENDIDOS A CLIENTE -->
                     <Tab text="Productos No Vendidos">
                         <content>
                             <VBox spacing="15.0">
                                 <children>
-                                    <!-- Controles -->
                                     <HBox alignment="CENTER_LEFT" spacing="20.0">
                                         <children>
                                             <Label text="Seleccionar Cliente:" />
@@ -234,14 +215,13 @@
                                                     -fx-background-color: #d35400; -fx-text-fill: white;
                                                 </style>
                                             </Button>
+                                            <Button fx:id="btnExportarNoVendidos" layoutX="470.0" layoutY="10.0" mnemonicParsing="false" onAction="#exportarReporteNoVendidos" text="Exportar a PDF" />
                                         </children>
                                     </HBox>
 
-                                    <!-- Tabla de resultados -->
                                     <TableView fx:id="tblProductosNoVendidos" prefHeight="500.0">
                                         <columns>
                                             <TableColumn fx:id="colProductoNoVendido" prefWidth="200.0" text="Producto" />
-                                            <TableColumn fx:id="colCategoriaNoVendido" prefWidth="120.0" text="Categoría" />
                                             <TableColumn fx:id="colPrecioNoVendido" prefWidth="120.0" text="Precio" />
                                             <TableColumn fx:id="colRecomendacion" prefWidth="300.0" text="Recomendación" />
                                         </columns>
@@ -254,32 +234,28 @@
                         </content>
                     </Tab>
 
-                    <!-- TAB 7: PROMOCIONES POR CLIENTE -->
                     <Tab text="Promociones">
                         <content>
                             <VBox spacing="15.0">
                                 <children>
-                                    <!-- Controles -->
                                     <HBox alignment="CENTER_LEFT" spacing="20.0">
                                         <children>
                                             <Label text="Seleccionar Cliente:" />
                                             <ComboBox fx:id="cbClientesPromocion" prefWidth="300.0" promptText="Seleccione un cliente..." />
                                             <Button fx:id="btnGenerarPromocionCliente" mnemonicParsing="false" text="Generar Promoción">
                                                 <style>
-                                                    -fx-background-color: #c0392b; -fx-text-fill: white;
+                                                    -fx-background-color: #7f8c8d; -fx-text-fill: white;
                                                 </style>
                                             </Button>
+                                            <Button fx:id="btnExportarPromocionCliente" layoutX="470.0" layoutY="10.0" mnemonicParsing="false" onAction="#exportarReportePromocionCliente" text="Exportar a PDF" />
                                         </children>
                                     </HBox>
 
-                                    <!-- Tabla de resultados -->
                                     <TableView fx:id="tblProductoMasVendidoCliente" prefHeight="500.0">
                                         <columns>
                                             <TableColumn fx:id="colClientePromocion" prefWidth="180.0" text="Cliente" />
                                             <TableColumn fx:id="colProductoFavorito" prefWidth="180.0" text="Producto Favorito" />
                                             <TableColumn fx:id="colCantidadComprada" prefWidth="120.0" text="Cantidad" />
-                                            <TableColumn fx:id="colTipoPromocion" prefWidth="150.0" text="Tipo Promoción" />
-                                            <TableColumn fx:id="colObservacionesPromocion" prefWidth="200.0" text="Observaciones" />
                                         </columns>
                                     </TableView>
                                 </children>
